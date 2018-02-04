@@ -194,6 +194,9 @@ a:hover, a:active { color:#fff; text-decoration: underline; }
 }
 .btn-default {
     background: rgba(255,255,255,.5);
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
 }
 .btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active {
     background: rgba(255,255,255,.8);
