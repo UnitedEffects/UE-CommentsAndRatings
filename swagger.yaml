@@ -1,0 +1,177 @@
+swagger: '2.0'
+info:
+  description: This is a generic comments and ratings service.
+  version: 1.0.0
+  title: United Effects Comments and Ratings Service
+  contact:
+    email: borzou@theboeffect.com
+host: localhost:3000
+basePath: /api
+tags:
+  - name: logs
+    description: Logging endpoints
+  - name: your api
+    description: Demo endpoint
+    externalDocs:
+      description: Replace this with your API
+      url: 'http://unitedeffects.com'
+schemes:
+  - http
+  - https
+paths:
+  /logs:
+    post:
+      tags:
+        - logs
+      summary: Write a new log to the console and the db
+      description: 'This is unlikely to be used with frequency.'
+      operationId: writeLog
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Log data to be written
+          required: true
+          schema:
+            $ref: '#/definitions/Log'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseLog'
+        '405':
+          description: Invalid input
+        '500':
+          description: Unknown error
+      security:
+        - UEAuth: []
+    get:
+      tags:
+        - logs
+      summary: Retrieve all logs in the system
+      description: ''
+      operationId: getLogs
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Logs'
+      security:
+        - UEAuth: []
+  '/logs/{code}':
+    get:
+      tags:
+        - logs
+      summary: Find all logs with one type of code.
+      description: Codes should be "error", "notify", or "success"
+      operationId: getLogByCode
+      produces:
+        - application/json
+      parameters:
+        - name: code
+          in: path
+          description: code of log types to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Logs'
+        '400':
+          description: Invalid code supplied
+      security:
+        - UEAuth: []
+  '/logs/{code}/{timestamp}':
+    get:
+      tags:
+        - logs
+      summary: Find a log with code and timestamp specified
+      description: Codes should be "error", "notify", or "success".
+      operationId: getLog
+      produces:
+        - application/json
+      parameters:
+        - name: code
+          in: path
+          description: code of log type to return
+          required: true
+          type: string
+        - name: timestamp
+          in: path
+          description: timestamp of log type to return
+          required: true
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseLog'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+
+securityDefinitions:
+  UEAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: For both UEAuth and other Bearer based tokens, type in "Bearer " followed by your Token.
+definitions:
+  Log:
+    type: object
+    required:
+      - logCode
+      - logTimestamp
+    properties:
+      logCode:
+        type: string
+        description: This is your hashKey. This should only be ERROR, NOTIFY, or SUCCESS
+      logTimestamp:
+        type: string
+        format: date-time
+        description: This is your rangeKey. This is a timestamp.
+      message:
+        type: string
+        description: This should be any brief summary data in string format.
+      details:
+        type: object
+        description: You can directly pipe any error message objects to here.
+  ApiResponseLog:
+    properties:
+      type:
+        type: string
+        default: 'Log'
+      data:
+        $ref: '#/definitions/Log'
+  Logs:
+    properties:
+      type:
+        type: string
+        default: 'Log'
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/Log'
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      data:
+        type: string
+externalDocs:
+  description: Built by United Effects
+  url: 'https://github.com/unitedeffects'

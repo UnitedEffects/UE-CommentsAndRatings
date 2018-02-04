@@ -1,0 +1,53 @@
+{
+  "name": "ue-comments-and-ratings",
+  "version": "1.0.0",
+  "private": false,
+  "main": "app.js",
+  "contributors": [
+    {
+      "name": "Bo Motlagh",
+      "email": "bmotlagh@unitedeffects.com"
+    }
+  ],
+  "scripts": {
+    "start": "node ./bin/start",
+    "dev": "nodemon ./bin/start",
+    "build": "babel lib -d dist",
+    "test": "mocha --recursive './test/*Test.js' --compilers js:babel-core/register",
+    "lintFix": "eslint . --fix"
+  },
+  "dependencies": {
+    "babel-core": "^6.25.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.16.1",
+    "cookie-parser": "^1.4.3",
+    "debug": "^3.0.0",
+    "es6-promisify": "^5.0.0",
+    "express": "^4.16.2",
+    "install": "^0.10.1",
+    "moment": "^2.19.1",
+    "mongoose": "^4.13.8",
+    "morgan": "^1.8.2",
+    "npm": "^5.5.1",
+    "passport": "^0.4.0",
+    "passport-http-bearer": "^1.0.1",
+    "pug": "^2.0.0-rc.3",
+    "serve-favicon": "^2.4.3",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^7.2.3",
+    "chai": "^4.1.1",
+    "chai-http": "^3.0.0",
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-mocha": "^4.11.0",
+    "eslint-plugin-react": "^7.2.1",
+    "mocha": "^3.3.0"
+  }
+}
