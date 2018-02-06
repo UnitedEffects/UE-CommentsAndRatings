@@ -1,5 +1,5 @@
 import express from 'express';
-import email from '../services/yourservice/api';
+import email from '../services/comrate/api';
 import log from '../services/log/api';
 import auth from '../services/auth/api';
 
