@@ -18,15 +18,24 @@ const targetSchema = new mongoose.Schema({
         type: Date,
         default: moment().format('LLLL')
     },
-    overall_values: [Number],
+    domain: {
+        type: String,
+        required: true
+    },
     dimensions: [
         {
             name: String,
-            dimension_values: [Number]
+            dimension_values: [{
+                _id: false,
+                comment_id: String,
+                value: Number
+            }]
         }
-    ]
+    ],
+    active: true
 });
 
+//overall value is calculated on request
 
 targetSchema.pre('save', callback => callback());
 

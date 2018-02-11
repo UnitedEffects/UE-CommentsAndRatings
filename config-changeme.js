@@ -15,6 +15,8 @@ const config = {
      * Configure the below for your needs. Each type is a general target for comments. Dimensions allow
      * a granular review.
      */
+    COMMENT_STATUS: ['pending', 'approved', 'rejected'],
+    COMMENT_DEFAULT_STATUS: 'pending',
     TARGET_TYPES: ['type1', 'type2', 'type3'],
     TARGET_DIMENSIONS: [
         {

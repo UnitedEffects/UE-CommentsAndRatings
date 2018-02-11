@@ -10,10 +10,10 @@ basePath: /api
 tags:
   - name: logs
     description: Logging endpoints
-  - name: your api
-    description: Demo endpoint
+  - name: comments
+    description: Manage comments and ratings
     externalDocs:
-      description: Replace this with your API
+      description: Learn more about United Effects
       url: 'http://unitedeffects.com'
 schemes:
   - http
@@ -119,7 +119,323 @@ paths:
           description: Log not found
       security:
         - UEAuth: []
-
+  /comments/{domain}:
+    get:
+      tags:
+        - comments
+      summary: Get all comments (parents by default) for a target
+      description: Get all comments (parents by default) for a target
+      operationId: getComments
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: locator
+          in: query
+          description: target locator to reference. either this or target ID are required but not both.
+          required: false
+          type: string
+        - name: targetId
+          in: query
+          description: target ID to reference. either this or locator are required but not both.
+          required: false
+          type: string
+        - name: parentId
+          in: query
+          description: returns children of this parent comment
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseComments'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /comment/{domain}/{id}:
+    get:
+      tags:
+        - comments
+      summary: Get a specific comment
+      description: Get a specific comment
+      operationId: getComment
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the comment
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseComment'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+    delete:
+      tags:
+        - comments
+      summary: Delete a specific comment
+      description: Delete a specific comment
+      operationId: deleteComment
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the comment
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseComment'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+    put:
+      tags:
+        - comments
+      summary: Replace a specific comment
+      description: Replace a specific comment
+      operationId: putComment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the comment
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Comment overwrite
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseComment'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /comment/{domain}/:
+    post:
+      tags:
+        - comments
+      summary: Create a comment
+      description: Create a comment
+      operationId: putComment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the comment
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Comment overwrite
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseComment'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /target/{domain}:
+    get:
+      tags:
+        - comments
+      summary: Get a target aggregate data. This may take a moment to respond.
+      description: Get a target aggregate data. This may take a moment to respond.
+      operationId: getOverallTarget
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: locator
+          in: query
+          description: locator for the target to map
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseTarget'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+    post:
+      tags:
+        - comments
+      summary: Create a new target independantly of comments.
+      description: Create a new target independantly of comments.
+      operationId: createTarget
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the target
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Comment overwrite
+          required: true
+          schema:
+            $ref: '#/definitions/Target'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseTarget'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /target/{domain}/{id}:
+    delete:
+      tags:
+        - comments
+      summary: Delete a specific target. This will orphan comments.
+      description: Delete a specific target. This will orphan comments.
+      operationId: deleteTarget
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the target
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseTarget'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+    patch:
+      tags:
+        - comments
+      summary: Update a specific target. Limited.
+      description: Update a specific target. Limited.
+      operationId: patchTarget
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: domain
+          in: path
+          description: UE Auth domain slug (or equivalent)
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: ID of the target
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Comment overwrite
+          required: true
+          schema:
+            $ref: '#/definitions/Target'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponseTarget'
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
 securityDefinitions:
   UEAuth:
     type: apiKey
@@ -153,6 +469,29 @@ definitions:
         default: 'Log'
       data:
         $ref: '#/definitions/Log'
+  ApiResponseComment:
+    properties:
+      type:
+        type: string
+        enum: ['Comment']
+      data:
+        $ref: '#/definitions/Comment'
+  ApiResponseTarget:
+    properties:
+      type:
+        type: string
+        enum: ['Comment']
+      data:
+        $ref: '#/definitions/Target'
+  ApiResponseComments:
+    properties:
+      type:
+        type: string
+        enum: ['Comments']
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/Comment'
   Logs:
     properties:
       type:
@@ -162,6 +501,42 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Log'
+  Comment:
+    properties:
+      target_id:
+        type: string
+      created:
+        type: string
+        format: date-time
+      creator:
+        type: string
+      modified:
+        type: string
+        format: date-time
+      parent_id:
+        type: string
+      modified_by:
+        type: string
+      comment:
+        type: string
+      domain:
+        type: string
+      dimensions:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            value:
+              type: integer
+              format: int32
+      overall_rating:
+        type: integer
+        format: int32
+      status:
+        type: string
+        description: see config for options
   ApiResponse:
     type: object
     properties:
@@ -172,6 +547,38 @@ definitions:
         type: string
       data:
         type: string
+  Target:
+    type: object
+    properties:
+      target_locator:
+        type: string
+      type:
+        type: string
+        description: see config for options
+      created:
+        type: string
+        format: date-time
+      domain:
+        type: string
+      dimensions:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            dimension_values:
+              type: array
+              items:
+                type: object
+                properties:
+                  comment_id:
+                    type: string
+                  value:
+                    type: integer
+                    format: int32
+      active:
+        type: boolean
 externalDocs:
   description: Built by United Effects
   url: 'https://github.com/unitedeffects'

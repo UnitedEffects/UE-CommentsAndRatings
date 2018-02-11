@@ -9,11 +9,6 @@ const commentSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    type: {
-        type: String,
-        required: true,
-        enum: config.TARGET_TYPES
-    },
     created: {
         type: Date,
         default: moment().format('LLLL')
@@ -23,14 +18,26 @@ const commentSchema = new mongoose.Schema({
         type: Date,
         default: moment().format('LLLL')
     },
+    parent_id: String,
     modified_by: String,
     comment: String,
+    domain: {
+        type: String,
+        required: true
+    },
     dimensions: [
         {
+            _id: false,
             name: String,
-            dimension_value: Number
+            value: Number
         }
-    ]
+    ],
+    overall_rating: Number,
+    status: {
+        type: String,
+        enum: config.COMMENT_STATUS,
+        default: config.COMMENT_DEFAULT_STATUS
+    }
 });
 
 
