@@ -5,7 +5,7 @@ const callbackFactory = {
     set200(message, type) {
         return {
             type,
-            data: (message) || 'success'
+            data: message || 'success'
         };
     },
     set(code, message, type) {
@@ -49,43 +49,43 @@ const callbackFactory = {
     fail400(message) {
         return {
             code: 400,
-            data: (message) || 'There was a problem with one of your inputs.'
+            data: message || 'There was a problem with one of your inputs.'
         };
     },
     fail401(message) {
         return {
             code: 401,
-            data: (message) || 'Unauthorized'
+            data: message || 'Unauthorized'
         };
     },
     fail403(message) {
         return {
             code: 403,
-            data: (message) || 'Request forbidden'
+            data: message || 'Request forbidden'
         };
     },
     fail404(message) {
         return {
             code: 404,
-            data: (message) || 'Not found.'
+            data: message || 'Not found.'
         };
     },
     fail405(message) {
         return {
             code: 405,
-            data: (message) || 'Method not allowed'
+            data: message || 'Method not allowed'
         };
     },
     fail409(message) {
         return {
             code: 409,
-            data: (message) || 'There was a data conflict with your input.'
+            data: message || 'There was a data conflict with your input.'
         };
     },
     fail500(message) {
         return {
             code: 500,
-            data: (message) || 'There was an unknown server code.'
+            data: message || 'There was an unknown server code.'
         };
     },
 };

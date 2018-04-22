@@ -22,6 +22,7 @@ const targetSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    /*
     dimensions: [
         {
             name: String,
@@ -32,7 +33,11 @@ const targetSchema = new mongoose.Schema({
             }]
         }
     ],
-    active: true
+    */
+    active: {
+        type: Boolean,
+        default: true
+    }
 });
 
 //overall value is calculated on request

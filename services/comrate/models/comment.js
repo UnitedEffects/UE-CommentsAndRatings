@@ -7,7 +7,7 @@ const commentSchema = new mongoose.Schema({
     target_id: {
         type: String,
         required: true,
-        unique: true
+        index: true
     },
     created: {
         type: Date,
@@ -29,7 +29,7 @@ const commentSchema = new mongoose.Schema({
         {
             _id: false,
             name: String,
-            value: Number
+            rating: Number
         }
     ],
     overall_rating: Number,

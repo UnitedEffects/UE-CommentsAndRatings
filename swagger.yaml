@@ -276,17 +276,12 @@ paths:
           description: UE Auth domain slug (or equivalent)
           required: true
           type: string
-        - name: id
-          in: path
-          description: ID of the comment
-          required: true
-          type: string
         - in: body
           name: body
-          description: Comment overwrite
+          description: Comment
           required: true
           schema:
-            $ref: '#/definitions/Comment'
+            $ref: '#/definitions/CommentPost'
       responses:
         '200':
           description: successful operation
@@ -303,7 +298,7 @@ paths:
       tags:
         - comments
       summary: Get a target aggregate data. This may take a moment to respond.
-      description: Get a target aggregate data. This may take a moment to respond.
+      description: Get a target aggregate data. This may take a moment to respond. Requires either locator or id (not both)
       operationId: getOverallTarget
       produces:
         - application/json
@@ -316,7 +311,10 @@ paths:
         - name: locator
           in: query
           description: locator for the target to map
-          required: true
+          type: string
+        - name: id
+          in: query
+          description: id for the target to map (overrides locator if used)
           type: string
       responses:
         '200':
@@ -345,22 +343,17 @@ paths:
           description: UE Auth domain slug (or equivalent)
           required: true
           type: string
-        - name: id
-          in: path
-          description: ID of the target
-          required: true
-          type: string
         - in: body
           name: body
           description: Comment overwrite
           required: true
           schema:
-            $ref: '#/definitions/Target'
+            $ref: '#/definitions/TargetPost'
       responses:
         '200':
           description: successful operation
           schema:
-            $ref: '#/definitions/ApiResponseTarget'
+            $ref: '#/definitions/ApiResponseSimpleTarget'
         '400':
           description: Invalid code supplied
         '404':
@@ -391,7 +384,7 @@ paths:
         '200':
           description: successful operation
           schema:
-            $ref: '#/definitions/ApiResponseTarget'
+            $ref: '#/definitions/ApiResponseSimpleTarget'
         '400':
           description: Invalid code supplied
         '404':
@@ -424,12 +417,12 @@ paths:
           description: Comment overwrite
           required: true
           schema:
-            $ref: '#/definitions/Target'
+            $ref: '#/definitions/SimpleTarget'
       responses:
         '200':
           description: successful operation
           schema:
-            $ref: '#/definitions/ApiResponseTarget'
+            $ref: '#/definitions/ApiResponseSimpleTarget'
         '400':
           description: Invalid code supplied
         '404':
@@ -483,6 +476,13 @@ definitions:
         enum: ['Comment']
       data:
         $ref: '#/definitions/Target'
+  ApiResponseSimpleTarget:
+    properties:
+      type:
+        type: string
+        enum: ['Comment']
+      data:
+        $ref: '#/definitions/SimpleTarget'
   ApiResponseComments:
     properties:
       type:
@@ -501,6 +501,26 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Log'
+  CommentPost:
+    properties:
+      target_locator:
+        type: string
+      parent_id:
+        type: string
+      type:
+        type: string
+      comment:
+        type: string
+      dimensions:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            rating:
+              type: integer
+              format: int32
   Comment:
     properties:
       target_id:
@@ -528,7 +548,7 @@ definitions:
           properties:
             name:
               type: string
-            value:
+            rating:
               type: integer
               format: int32
       overall_rating:
@@ -547,6 +567,18 @@ definitions:
         type: string
       data:
         type: string
+  TargetPost:
+    type: object
+    required:
+      - target_locator
+      - type
+      - domain
+    properties:
+      target_locator:
+        type: string
+      type:
+        type: string
+        description: see config for options
   Target:
     type: object
     properties:
@@ -567,16 +599,24 @@ definitions:
           properties:
             name:
               type: string
-            dimension_values:
-              type: array
-              items:
-                type: object
-                properties:
-                  comment_id:
-                    type: string
-                  value:
-                    type: integer
-                    format: int32
+            overall_rating:
+              type: integer
+              format: int32
+      active:
+        type: boolean
+  SimpleTarget:
+    type: object
+    properties:
+      target_locator:
+        type: string
+      type:
+        type: string
+        description: see config for options
+      created:
+        type: string
+        format: date-time
+      domain:
+        type: string
       active:
         type: boolean
 externalDocs:

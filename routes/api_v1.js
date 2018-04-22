@@ -22,16 +22,27 @@ router.get('/', (req,res) => {
         currentMaintainers: pJson.contributors
     });
 });
-
+/*
 router.get('/comments/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.getComments);
-router.get('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.getComment); //check own in function
+router.get('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.getComment);
 router.post('/comment/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.postComment);
-router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment); //check own in function
-router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment); //check own in function
+router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment); //check creator in function
+router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment); //check creator in function
 router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle], comApi.getOverallTarget);
 router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.createTarget);
 router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
+*/
+router.get('/comments/:domain', comApi.getComments); //todo 1
+router.get('/comment/:domain/:id', comApi.getComment); //todo 2
+router.post('/comment/:domain', comApi.postComment);
+router.put('/comment/:domain/:id', comApi.putComment); //check creator in function todo 5
+router.delete('/comment/:domain/:id', comApi.deleteComment); //check creator in function todo 4
+router.get('/target/:domain/', comApi.getOverallTarget); //todo 3
+router.post('/target/:domain', comApi.createTarget);
+router.patch('/target/:domain/:id', comApi.patchTarget);
+router.delete('/target/:domain/:id', comApi.deleteTarget);
+router.get('/targets', comApi.getTargets);
 
 /**
  * Log API Calls
