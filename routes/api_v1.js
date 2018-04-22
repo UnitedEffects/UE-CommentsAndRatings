@@ -33,12 +33,12 @@ router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi
 router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
 */
-router.get('/comments/:domain', comApi.getComments); //todo 1
+router.get('/comments/:domain', comApi.getComments); //todo 1 (don't forget limits - 1000, include total number beyond of limit)
 router.get('/comment/:domain/:id', comApi.getComment); //todo 2
 router.post('/comment/:domain', comApi.postComment);
 router.put('/comment/:domain/:id', comApi.putComment); //check creator in function todo 5
 router.delete('/comment/:domain/:id', comApi.deleteComment); //check creator in function todo 4
-router.get('/target/:domain/', comApi.getOverallTarget); //todo 3
+router.get('/target/:domain/', comApi.getOverallTarget); //todo 3 document overall calc is limited to first 500 comments
 router.post('/target/:domain', comApi.createTarget);
 router.patch('/target/:domain/:id', comApi.patchTarget);
 router.delete('/target/:domain/:id', comApi.deleteTarget);
