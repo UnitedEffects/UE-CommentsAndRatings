@@ -102,7 +102,41 @@ export default {
                 })
 
         })
+    },
+    findTargetFromLocator(query) {
+        return new Promise((resolve, reject) => {
+            if(query.targetId) return resolve(query.targetId);
+            Target.findOne({ target_locator: query.locator })
+                .then((target) => {
+                    if(!target) return reject(send.fail404(query));
+                    return resolve(target._id);
+                })
+                .catch(error => reject(send.fail400(error)));
+        })
+    },
+    getComments(query) {
+        return new Promise((resolve, reject) => {
+            let count = 0;
+            Comment.find(query).count()
+                .then((i) => {
+                    count = i;
+                    return Comment.find(query).limit(1000)
+                })
+                .then(comments => resolve(send.set200({ count: count, comments: comments}, 'Comments')))
+                .catch(error => reject(send.fail400(error)));
+        })
+    },
+    getComment(id) {
+        return new Promise((resolve, reject) => {
+            Comment.findOne({ _id: id })
+                .then((com) => {
+                    if(!com) return reject(send.fail404(id));
+                    return resolve(send.set200(com, 'Comment'));
+                })
+                .catch(error => reject(send.fail400(error)));
+        })
     }
+
 };
 
 function returnOverAllForOneComment (comment) {

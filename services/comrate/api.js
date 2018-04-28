@@ -101,8 +101,25 @@ export default {
                 if(error.isJoi) return responder.send(res, send.fail400(error));
                 return responder.send(res, error)
             });
+    },
+    getComments(req, res) {
+        if (!req.query.locator && !req.query.targetId) responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
+        dal.findTargetFromLocator(req.query)
+            .then((tid) => {
+                const query = {
+                    target_id: tid,
+                    parent_id: req.query.parentId
+                };
+                return dal.getComments(query);
+            })
+            .then(output => responder.send(res, output))
+            .catch(error => responder.send(res, error));
 
-
+    },
+    getComment(req, res) {
+        dal.getComment(req.params.id)
+            .then(output => responder.send(res, output))
+            .catch(error => responder.send(res, error));
 
     },
     putComment(req, res) {
@@ -124,22 +141,6 @@ export default {
          * Delete comment
          * Respond
          * Async: Remove comment from target aggregates
-         */
-    },
-    getComments(req, res) {
-        /**
-         * Performs well
-         * Limit response to 500
-         * req.query.parentId?
-         * req.query.locator?
-         * req.query.targetId?
-         * Get Target using locator
-         * Get All Comments using target_id and return as is
-         */
-    },
-    getComment(req, res) {
-        /**
-         * just works from ID
          */
     },
     getOverallTarget(req, res) {
