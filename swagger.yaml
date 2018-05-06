@@ -312,7 +312,7 @@ paths:
           in: query
           description: locator for the target to map
           type: string
-        - name: id
+        - name: targetId
           in: query
           description: id for the target to map (overrides locator if used)
           type: string
@@ -592,12 +592,15 @@ definitions:
         format: date-time
       domain:
         type: string
+      average_rating:
+        type: integer
+        format: int32
       dimensions:
         type: array
         items:
           type: object
           properties:
-            name:
+            _id:
               type: string
             overall_rating:
               type: integer

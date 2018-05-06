@@ -22,18 +22,6 @@ const targetSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    /*
-    dimensions: [
-        {
-            name: String,
-            dimension_values: [{
-                _id: false,
-                comment_id: String,
-                value: Number
-            }]
-        }
-    ],
-    */
     active: {
         type: Boolean,
         default: true

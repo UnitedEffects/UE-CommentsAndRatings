@@ -135,8 +135,67 @@ export default {
                 })
                 .catch(error => reject(send.fail400(error)));
         })
-    }
+    },
+    async getTargetByLocOrId(query) {
+        try {
+            let search = {};
+            if (query.targetId) search = { _id: query.targetId };
+            else search = { target_locator: query.locator };
+            const target = await Target.findOne(search);
+            if(!target) return send.fail404(id);
+            return send.set200(target, 'Target');
+        } catch (error) {
+            throw send.fail400(error);
+        }
+    },
+    async calculateOverall(id) {
+        try {
+            return Comment.aggregate([
+                {   "$match": { "target_id": id.toString(), parent_id: undefined } },
+                {   "$limit": 1000 },
+                {   "$unwind": "$dimensions" },
+                {   "$group": {
+                    _id: '$dimensions.name',
+                    overall_rating: {$avg: "$dimensions.rating"}
+                    }
+                }
+            ]);
+        } catch (error) {
+            throw send.fail400(error);
+        }
 
+    },
+    async calculateAverageRating(id) {
+        try {
+            return Comment.aggregate([
+                {   "$match": { "target_id": id.toString(), parent_id: undefined } },
+                {   "$limit": 1000 },
+                {   "$group": {
+                    _id: id,
+                    average_rating: {$avg: "$overall_rating"}
+                }
+                }
+            ]);
+        } catch (error) {
+            throw send.fail400(error);
+        }
+    },
+    async deleteComment(id) {
+        try {
+            const result = await Comment.findOneAndRemove({ _id: id });
+            if(!result) return send.fail404(id);
+        } catch (error) {
+            throw send.fail400(error);
+        }
+    },
+    async putComment(id, data) {
+        try {
+            const result = Comment.replaceOne({ _id: id }, data);
+            if(!result) return send.fail404({ id: id, update: data });
+        } catch (error) {
+            throw send.fail400(error);
+        }
+    }
 };
 
 function returnOverAllForOneComment (comment) {

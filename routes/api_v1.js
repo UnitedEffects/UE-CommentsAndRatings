@@ -3,6 +3,7 @@ import comApi from '../services/comrate/api';
 import log from '../services/log/api';
 import auth from '../services/auth/api';
 import rbac from '../services/auth/roleApi';
+const config = require('../config');
 
 const pJson = require('../package.json');
 
@@ -11,7 +12,7 @@ const router = express.Router();
 /**
  * You'll want to change these values
  */
-router.get('/', (req,res) => {
+router.get('/version', (req,res) => {
     res.json({
         service: 'United Effects Comments and Ratings Service',
         license: 'MIT',
@@ -33,15 +34,28 @@ router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi
 router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
 */
+
+/**
+ * todo
+ * Test Put and Delete on Comments
+ * Add auth back in
+ * Retest all endpoints
+ * Validate role permissions...
+ * Update readme
+ * Add unit tests
+ * Deploy to QA
+ */
 router.get('/comments/:domain', comApi.getComments);
 router.get('/comment/:domain/:id', comApi.getComment);
 router.post('/comment/:domain', comApi.postComment);
-router.put('/comment/:domain/:id', comApi.putComment); //check creator in function todo 5
-router.delete('/comment/:domain/:id', comApi.deleteComment); //check creator in function todo 4
-router.get('/target/:domain/', comApi.getOverallTarget); //todo 3 document overall calc is limited to first 500 comments
+router.put('/comment/:domain/:id', comApi.putComment);
+router.delete('/comment/:domain/:id', comApi.deleteComment);
+router.get('/target/:domain/', comApi.getOverallTarget);
 router.post('/target/:domain', comApi.createTarget);
 router.patch('/target/:domain/:id', comApi.patchTarget);
 router.delete('/target/:domain/:id', comApi.deleteTarget);
+
+//keep this for future testing
 router.get('/targets', comApi.getTargets);
 
 /**
