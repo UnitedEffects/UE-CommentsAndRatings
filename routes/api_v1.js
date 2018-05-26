@@ -37,10 +37,10 @@ router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], 
 
 /**
  * todo
+ * Add unit tests
  * Validate role permissions...
  * Update readme
- * Add unit tests
- * Deploy to QA
+
 
  //THESE ARE FOR TESTING ONLY AND WILL BE REMOVED
 router.get('/comments/:domain', comApi.getComments);
