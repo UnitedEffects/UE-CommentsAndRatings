@@ -180,7 +180,14 @@ export default {
             if (!req.query.locator && !req.query.targetId) responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
             const target = JSON.parse(JSON.stringify(await dal.getTargetByLocOrId(req.query, req.params.domain)));
             if(target.code === 404) return responder.send(res, target);
-            target.data.dimensions = await dal.calculateOverall(target.data._id);
+            target.data.dimensions = [];
+            const overallCalc = await dal.calculateOverall(target.data._id);
+            await Promise.all(overallCalc.map((dim) => {
+                target.data.dimensions.push({
+                    name: dim._id,
+                    overall_rating: dim.overall_rating
+                })
+            }));
             const averageRating = await dal.calculateAverageRating(target.data._id);
             if(averageRating.length > 0) target.data.average_rating = averageRating[0].average_rating;
             return responder.send(res, target);

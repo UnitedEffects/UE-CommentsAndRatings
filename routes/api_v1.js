@@ -1,4 +1,5 @@
 import express from 'express';
+import apicache from 'apicache'
 import comApi from '../services/comrate/api';
 import log from '../services/log/api';
 import auth from '../services/auth/api';
@@ -8,6 +9,7 @@ const config = require('../config');
 const pJson = require('../package.json');
 
 const router = express.Router();
+let cache = apicache.middleware;
 
 /**
  * You'll want to change these values
@@ -24,12 +26,12 @@ router.get('/version', (req,res) => {
     });
 });
 
-router.get('/comments/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.getComments);
+router.get('/comments/:domain', [auth.isBearerAuthenticated, rbac.middle, cache('2 minutes')], comApi.getComments);
 router.get('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.getComment);
 router.post('/comment/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.postComment);
 router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment);
 router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment);
-router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle], comApi.getOverallTarget);
+router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle, cache('2 minutes')], comApi.getOverallTarget);
 router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.createTarget);
 router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);

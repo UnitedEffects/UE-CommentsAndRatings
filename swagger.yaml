@@ -627,7 +627,7 @@ definitions:
         items:
           type: object
           properties:
-            _id:
+            name:
               type: string
             overall_rating:
               type: integer
