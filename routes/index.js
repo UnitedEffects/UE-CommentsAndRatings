@@ -13,9 +13,16 @@ router.get('/', (req, res) => {
 });
 
 router.get('/swagger.json', (req, res) =>  {
-    const swag = yaml.load('./swagger.yaml');
-    if (process.env.SWAG_DOM) swag.host = process.env.SWAG_DOM;
-    res.json(swag);
-});
+    try{
+        const swag = yaml.load('./swagger.yaml');
+        swag.info.version = pJson.version;
+        if (process.env.SWAGGER) swag.host = process.env.SWAGGER;
+        if (process.env.NODE_ENV.toLowerCase()==='production' || process.env.NODE_ENV.toLowerCase()==='qa') swag.schemes = ['https'];
+        res.json(swag);
+    }catch (error) {
+        console.info(error);
+        res.status(400).send(error);
+    }
 
+});
 export default router;
