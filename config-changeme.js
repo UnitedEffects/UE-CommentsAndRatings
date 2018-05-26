@@ -4,11 +4,10 @@
 
 const config = {
     ENV: process.env.NODE_ENV || 'dev',
-    SWAGGER: process.env.SWAGGER || 'localhost:3000',
-    MONGO: process.env.MONGO || 'mongodb://localhost:27017/ue-boilerplate',
+    SWAGGER: process.env.SWAGGER || 'localhost:4040',
+    MONGO: process.env.MONGO || 'mongodb://localhost:27017/ue-comment-ratings',
     REPLICA: process.env.REPLICA || 'rs0',
-    UEAUTH: process.env.UEAUTH || 'https://domain.unitedeffects.com',
-    WEBHOOK: process.env.WEBHOOK || 'YOURWEBHOOKVALUE',
+    UEAUTH: process.env.UEAUTH || 'https://domainqa.unitedeffects.com',
     PRODUCT_SLUG: process.env.PRODUCT_SLUG || 'your_product_slug',
     IMPLEMENTER: process.env.IMPLEMENTER || 'United Effects LLC',
     /**
@@ -17,18 +16,19 @@ const config = {
      */
     COMMENT_STATUS: ['pending', 'approved', 'rejected'],
     COMMENT_DEFAULT_STATUS: 'pending',
-    TARGET_TYPES: ['type1', 'type2', 'type3'],
+    TARGET_TYPES: ['user', 'property', 'merchant'],
+    MAX_POSSIBLE_RATING: 5,
     TARGET_DIMENSIONS: [
         {
-            type: 'type1',
+            type: 'user',
             dimensions: ['reliability', 'honesty', 'fairness']
         },
         {
-            type: 'type2',
+            type: 'property',
             dimensions: ['accuracy', 'communication', 'cleanliness', 'location', 'value']
         },
         {
-            type: 'type3',
+            type: 'merchant',
             dimensions: ['value', 'quality', 'service', 'accuracy']
         }
     ]

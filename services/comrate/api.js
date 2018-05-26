@@ -7,6 +7,7 @@ import responder from '../responder';
 import send from '../response';
 import dal from './dal';
 import config from '../../config';
+import auth from '../auth/auth';
 
 export default {
     async getTargets (req, res) {
@@ -98,11 +99,14 @@ export default {
     async getComments(req, res) {
         try {
             if (!req.query.locator && !req.query.targetId) responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
-            const tid = await dal.findTargetFromLocator(req.query);
+            const tid = await dal.findTargetFromLocator(req.query, req.params.domain);
+            if(tid.code) return responder.send(res, tid);
             const query = {
                 target_id: tid,
-                parent_id: req.query.parentId
+                parent_id: req.query.parentId,
+                domain: req.params.domain,
             };
+            if(req.query.status) query.status = req.query.status;
             return responder.send(res, await dal.getComments(query));
         } catch (error) {
             return responder.send(res, error);
@@ -110,24 +114,41 @@ export default {
     },
     async getComment(req, res) {
         try {
-            return responder.send(res, await dal.getComment(req.params.id));
+            return responder.send(res, await dal.getComment(req.params.id, req.params.domain));
         } catch (error) {
             return responder.send(res, error);
         }
     },
     async putComment(req, res) {
         try {
+            const myComment = await dal.getComment(req.params.id, req.params.domain);
+            const myTarget = await dal.getTargetByLocOrId({ targetId: req.body.target_id }, req.params.domain);
+            if(myComment.code === 404) return responder.send(res, myComment);
+            if(myTarget.code === 404) {
+                myTarget.data.dependency = "Target";
+                return responder.send(res, myTarget);
+            }
+            if (myComment.data.creator !== req.user._id && !auth.thisValidProductAdmin(req.user, config.PRODUCT_SLUG)) {
+                return responder.send(res, send.fail401('Must be commenter or admin to change this.'));
+            }
             const comment = req.body;
-            comment.domain = req.params.domain;
-            comment.creator = (req.user) ? req.user._id : 'anonymous';
+            comment.creator = myComment.data.creator;
+            comment.created = myComment.data.created;
             comment.modified_by = (req.user) ? req.user._id : 'anonymous';
+            if(!comment.domain) comment.domain = myComment.data.domain;
+            comment.__v = myComment.data.__v++;
+            delete comment._id;
+            delete comment.overall_rating;
+            delete comment.modified;
             const schema = Joi.object({ allowUnknown: false }).keys({
-                target_locator: Joi.string().required(),
+                target_id: Joi.string().required(),
+                created: Joi.date(),
                 creator: Joi.string().required(),
                 modified_by: Joi.string().required(),
                 parent_id: Joi.string(),
+                __v: Joi.number(),
                 domain: Joi.string().required(),
-                type: Joi.string().valid(config.TARGET_TYPES).required(),
+                status: Joi.string(),
                 comment: Joi.string().required(),
                 dimensions: Joi.array().items(Joi.object({ allowUnknown: false }).keys({
                     name: Joi.string(),
@@ -135,10 +156,8 @@ export default {
                 }))
             });
             await Joi.validate(comment, schema);
-            const target = await dal.verifyTarget(comment.target_locator, comment.domain, comment.type);
-            if(!target) return responder.send(res, send.fail400('Unknown Error: Could not identify a target for the comment'));
-            comment.target_id = target._id;
-            return responder.send(res, await dal.putComment(req.params.id, comment));
+            const results = await dal.putComment(req.params.id, req.params.domain, comment);
+            return responder.send(res, results);
         } catch (error) {
             if(error.isJoi) return responder.send(res, send.fail400(error));
             return responder.send(res, error)
@@ -146,7 +165,12 @@ export default {
     },
     async deleteComment(req, res) {
         try {
-            return responder.send(res, await dal.deleteComment(req.params.id));
+            const myComment = await dal.getComment(req.params.id, req.params.domain);
+            if(myComment.code === 404) return responder.send(res, myComment);
+            if (myComment.data.creator !== req.user._id && !auth.thisValidProductAdmin(req.user, config.PRODUCT_SLUG)) {
+                return responder.send(res, send.fail401('Must be commenter or admin to delete this.'));
+            }
+            return responder.send(res, await dal.deleteComment(req.params.id, req.params.domain));
         } catch (error) {
             return responder.send(res, error);
         }
@@ -154,9 +178,11 @@ export default {
     async getOverallTarget(req, res) {
         try {
             if (!req.query.locator && !req.query.targetId) responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
-            const target = JSON.parse(JSON.stringify(await dal.getTargetByLocOrId(req.query)));
+            const target = JSON.parse(JSON.stringify(await dal.getTargetByLocOrId(req.query, req.params.domain)));
+            if(target.code === 404) return responder.send(res, target);
             target.data.dimensions = await dal.calculateOverall(target.data._id);
-            target.data.average_rating = (await dal.calculateAverageRating(target.data._id))[0].average_rating;
+            const averageRating = await dal.calculateAverageRating(target.data._id);
+            if(averageRating.length > 0) target.data.average_rating = averageRating[0].average_rating;
             return responder.send(res, target);
         } catch (error) {
             return responder.send(res, error);

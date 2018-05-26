@@ -149,6 +149,11 @@ paths:
           description: returns children of this parent comment
           required: false
           type: string
+        - name: status
+          in: query
+          description: returns comments with this status. default returns all statuses
+          required: false
+          type: string
       responses:
         '200':
           description: successful operation
@@ -247,7 +252,7 @@ paths:
           description: Comment overwrite
           required: true
           schema:
-            $ref: '#/definitions/Comment'
+            $ref: '#/definitions/CommentPut'
       responses:
         '200':
           description: successful operation
@@ -296,7 +301,7 @@ paths:
   /target/{domain}:
     get:
       tags:
-        - comments
+        - target
       summary: Get a target aggregate data. This may take a moment to respond.
       description: Get a target aggregate data. This may take a moment to respond. Requires either locator or id (not both)
       operationId: getOverallTarget
@@ -329,7 +334,7 @@ paths:
         - UEAuth: []
     post:
       tags:
-        - comments
+        - target
       summary: Create a new target independantly of comments.
       description: Create a new target independantly of comments.
       operationId: createTarget
@@ -363,7 +368,7 @@ paths:
   /target/{domain}/{id}:
     delete:
       tags:
-        - comments
+        - target
       summary: Delete a specific target. This will orphan comments.
       description: Delete a specific target. This will orphan comments.
       operationId: deleteTarget
@@ -393,7 +398,7 @@ paths:
         - UEAuth: []
     patch:
       tags:
-        - comments
+        - target
       summary: Update a specific target. Limited.
       description: Update a specific target. Limited.
       operationId: patchTarget
@@ -510,6 +515,28 @@ definitions:
       type:
         type: string
       comment:
+        type: string
+      dimensions:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            rating:
+              type: integer
+              format: int32
+  CommentPut:
+    properties:
+      target_id:
+        type: string
+      parent_id:
+        type: string
+      comment:
+        type: string
+      status:
+        type: string
+      domain:
         type: string
       dimensions:
         type: array

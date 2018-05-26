@@ -42,9 +42,9 @@ const roleApi = {
             .then(async (roles) => {
                 let resource = req.path.split('/')[1];
                 if (resource === '') resource = 'root';
-                console.info(resource);
-                console.info(req.params.domain);
-                console.info(roles);
+                //console.info(resource);
+                //console.info(req.params.domain);
+                //console.info(roles);
                 let access = false;
                 await Promise.all(roles.map((role) => {
                     switch (req.method) {

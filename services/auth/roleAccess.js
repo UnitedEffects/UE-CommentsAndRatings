@@ -3,6 +3,7 @@ const ac = new Access();
 
 ac.grant(['guest', 'landlord', 'merchant'])
     .createAny('comment')
+    .createAny('target')
     .updateOwn('comment')
     .readAny('comment')
     .readAny('comments')
@@ -12,7 +13,6 @@ ac.grant(['guest', 'landlord', 'merchant'])
 
 ac.grant(['superAdmin', 'productAdmin', 'productManager', 'domainAdmin', 'domainManager'])
     .extend('guest')
-    .createAny('target')
     .updateAny('comment')
     .updateAny('target')
     .deleteAny('comment')

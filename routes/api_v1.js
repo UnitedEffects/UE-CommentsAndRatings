@@ -23,28 +23,26 @@ router.get('/version', (req,res) => {
         currentMaintainers: pJson.contributors
     });
 });
-/*
+
 router.get('/comments/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.getComments);
 router.get('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.getComment);
 router.post('/comment/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.postComment);
-router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment); //check creator in function
-router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment); //check creator in function
+router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment);
+router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment);
 router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle], comApi.getOverallTarget);
 router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.createTarget);
 router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
-*/
+
 
 /**
  * todo
- * Test Put and Delete on Comments
- * Add auth back in
- * Retest all endpoints
  * Validate role permissions...
  * Update readme
  * Add unit tests
  * Deploy to QA
- */
+
+ //THESE ARE FOR TESTING ONLY AND WILL BE REMOVED
 router.get('/comments/:domain', comApi.getComments);
 router.get('/comment/:domain/:id', comApi.getComment);
 router.post('/comment/:domain', comApi.postComment);
@@ -57,6 +55,7 @@ router.delete('/target/:domain/:id', comApi.deleteTarget);
 
 //keep this for future testing
 router.get('/targets', comApi.getTargets);
+*/
 
 /**
  * Log API Calls

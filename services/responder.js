@@ -6,6 +6,10 @@ import log from './log/logs';
 const respond = {
     send(res, output) {
         let status;
+        if (!output) output = {
+            code: 500,
+            data: "unknown error"
+        };
         if (output.code) status = output.code;
         if (output.stack) status = 500;
         const resp = {
