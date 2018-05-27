@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  description: This is a generic comments and ratings service.
+  description: This is a generic comments and ratings service available from United Effects LLC and implemented by {{IMPLEMENTER}}.
   version: 1.0.0
   title: United Effects Comments and Ratings Service
   contact:
