@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  description: This is a generic comments and ratings service available from United Effects LLC and implemented by {{IMPLEMENTER}}.
+  description: This is a generic comments and ratings service available from United Effects LLC and implemented by {{IMPLEMENTER}}.<br> <div>The Comments and Ratings service allows you to interact with this REST API to create or interact with the following artifacts:</div> <ul> <li>Targets - An artifact that uniquely represents something against which comments are submitted. This can be a web page, a single object on a screen, or really anything that has a unique identifier relative to your domain. As an additional layer of data organization, targets are classified by a "Type" property which can be configured through the config.js file and deployed with the service.</li> <li>Comments - A comment is a user submitted message that is saved relative to a target.</li> <li>Ratings - Ratings are optionally submitted against "Dimensions" which are configured for each potential "Type" of Target within the config.js file and part of the Comment itself. They are actually an array on the Comment data model. The rating is represented as a numerical value with a range also specified in the config file.</li> </ul> <div>It is highly recommended that you view the repository <a href="">README</a></div>
   version: 1.0.0
   title: United Effects Comments and Ratings Service
   contact:

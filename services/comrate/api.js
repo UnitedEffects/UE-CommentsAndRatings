@@ -128,7 +128,7 @@ export default {
                 myTarget.data.dependency = "Target";
                 return responder.send(res, myTarget);
             }
-            if (myComment.data.creator !== req.user._id && !auth.thisValidProductAdmin(req.user, config.PRODUCT_SLUG)) {
+            if (myComment.data.creator !== req.user._id && !auth.thisValidProductAdmin(req.user)) {
                 return responder.send(res, send.fail401('Must be commenter or admin to change this.'));
             }
             const comment = req.body;
@@ -167,7 +167,7 @@ export default {
         try {
             const myComment = await dal.getComment(req.params.id, req.params.domain);
             if(myComment.code === 404) return responder.send(res, myComment);
-            if (myComment.data.creator !== req.user._id && !auth.thisValidProductAdmin(req.user, config.PRODUCT_SLUG)) {
+            if (myComment.data.creator !== req.user._id && !auth.thisValidProductAdmin(req.user)) {
                 return responder.send(res, send.fail401('Must be commenter or admin to delete this.'));
             }
             return responder.send(res, await dal.deleteComment(req.params.id, req.params.domain));

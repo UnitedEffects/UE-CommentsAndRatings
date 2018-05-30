@@ -219,7 +219,7 @@ const authFactory = {
         }
         return false;
     },
-    thisValidProductAdmin (user, product) {
+    thisValidProductAdmin (user, product = config.PRODUCT_SLUG) {
         if(user.role === 1) return true;
         else if(user.permissions) if(user.permissions.product) if(user.permissions.product[product]) {
             if(user.permissions.product[product].admin || user.permissions.product[product].manager) return true;
