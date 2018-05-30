@@ -41,22 +41,6 @@ router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], 
  * todo
  * Add unit tests
  * Validate role permissions...
- * Update readme
-
-
- //THESE ARE FOR TESTING ONLY AND WILL BE REMOVED
-router.get('/comments/:domain', comApi.getComments);
-router.get('/comment/:domain/:id', comApi.getComment);
-router.post('/comment/:domain', comApi.postComment);
-router.put('/comment/:domain/:id', comApi.putComment);
-router.delete('/comment/:domain/:id', comApi.deleteComment);
-router.get('/target/:domain/', comApi.getOverallTarget);
-router.post('/target/:domain', comApi.createTarget);
-router.patch('/target/:domain/:id', comApi.patchTarget);
-router.delete('/target/:domain/:id', comApi.deleteTarget);
-
-//keep this for future testing
-router.get('/targets', comApi.getTargets);
 */
 
 /**
