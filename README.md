@@ -3,7 +3,7 @@ A Generic Comments and Ratings Service
 
 ## Description
 
-The Comments and Ratings service allows you to interact with a REST API (here) to create or interact with the following artifacts:
+The Comments and Ratings service allows you to interact with a REST API to create or interact with the following artifacts:
 
 * Targets - An artifact that uniquely represents something against which comments are submitted. This can be a web page, a single object on a screen, or really anything that has a unique identifier relative to your domain. As an additional layer of data organization, targets are classified by a "Type" property which can be configured through the config.js file and deployed with the service. 
 * Comments - A comment is a user submitted message that is saved relative to a target.
