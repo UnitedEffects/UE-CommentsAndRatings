@@ -32,7 +32,7 @@ This is accomplished by using the MongoDB aggregation model to find and group pr
 From a performance perspective, this is offloading the work from this service to mongo itself; however, it is expected that this data will take more time to serve than simply returning the comment list. Two mechanisms are in place to account for this potential performance issue:
 
 * If you do a GET against the Target, it will return the overall calculations listed here, but not the comments themselves. There is a GET filtered Comments endpoint in the API that will allow you to get these comments immediately upon viewing a target in a UI for example. In this way, you can make the call for all of the Comments to populate the page and make the call for the Target information at the same time, but rest easy knowing that even though the target level ratings may not have rendered yet, all of the comments should be there.
-* The GET Target and Comment endpoints are cached for 3 minutes. The upside is that this will be performant in general. The downside is that new comments may not show for 3 minutes.
+* The GET Target and Comment endpoints are cached for 2 minutes. The upside is that this will be performant in general. The downside is that new comments may not show for 3 minutes.
 
 ## Terms
 
