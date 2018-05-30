@@ -10,6 +10,7 @@ const config = {
     UEAUTH: process.env.UEAUTH || 'https://domainqa.unitedeffects.com',
     PRODUCT_SLUG: process.env.PRODUCT_SLUG || 'your_product_slug',
     IMPLEMENTER: process.env.IMPLEMENTER || 'United Effects LLC',
+    BASE_ACCESS: process.env.BASE_ACCESS || 'guest',
     /**
      * Configure the below for your needs. Each type is a general target for comments. Dimensions allow
      * a granular review.

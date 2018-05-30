@@ -1,7 +1,10 @@
 import Access from 'accesscontrol';
-const ac = new Access();
+import config from '../../config';
 
-ac.grant(['guest', 'landlord', 'merchant'])
+const ac = new Access();
+const baseAccess = config.BASE_ACCESS.split(',');
+
+ac.grant(baseAccess)
     .createAny('comment')
     .createAny('target')
     .updateOwn('comment')

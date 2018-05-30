@@ -40,6 +40,11 @@ From a performance perspective, this is offloading the work from this service to
   * If you do replace the UEAuth implementation, please check deleteComment and putComment in /services/comrate/api.js as both of these functions reference auth.isValidProductAdminOnly, which will need to be removed.
   * Within config.js, there is a reference to the United Effects Domain service under property UEAuth. This is used for token validation in the UEAuth platform. If you replace authentication, this property would not be required.
 * UE Roles - UE Auth allows for the concept and management of roles. There are a few standard roles such as Super Admin, Product Admin, Domain Admin and Guest. We manage access based on these roles via middleware. This too can be modified or replaced depending on your needs with minimal change.
+* Base Access - Part of the roles system. Usually this will just be guest, but you can define any additional roles that you want to call out for this level of access in config with a comma delimited list (no spaces)
+```
+    BASE_ACCESS: process.env.BASE_ACCESS || 'guest,other,somethingelse',
+```
+
 * Product - The Product, referred to as PRDUCT_SLUG in config.js, is our term for an organization employing this service. It is the highest level hierarchical root of a multi-tenant system where each tenant is defined as a Domain. In UE Auth, we represent this with a unique slug, all lowercase, no special characters, and underscores instead of spaces.
 * Domain - Every endpoint in this API references a Domain. Even if you don't use UEAuth, this is still a good practice as it allows a consistent organization of unique targets and access to those targets. As explained above, Domains are tenants of a multi-tenant system and UE Auth restricts access to domains based on user privileges.
 * Implementer - Where United Effects LLC is the author, the Implementer is you (whomever you may be). This field is set in the config.js file and allows the generated documentation to reference you.
@@ -86,6 +91,7 @@ From a performance perspective, this is offloading the work from this service to
     UEAUTH: process.env.UEAUTH || 'https://domainqa.unitedeffects.com',
     PRODUCT_SLUG: process.env.PRODUCT_SLUG || 'your_product_slug',
     IMPLEMENTER: process.env.IMPLEMENTER || 'United Effects LLC',
+    BASE_ACCESS: process.env.BASE_ACCESS || 'guest',
     /**
      * Configure the below for your needs. Each type is a general target for comments. Dimensions allow
      * a granular review.
