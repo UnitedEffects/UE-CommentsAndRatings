@@ -8,9 +8,6 @@ RUN mkdir /src
 COPY . /src
 WORKDIR /src
 
-RUN mv /src/config-changeme.js /src/config.js
-RUN yarn
-
-EXPOSE 3000
+RUN mv /src/config-changeme.js /src/config.js && yarn && yarn test
 
 CMD ["yarn", "start"]
