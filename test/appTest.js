@@ -71,5 +71,473 @@ describe('app index route', () => {
         assert(res.body.data.overall_rating === 4, "Should have an overall rating");
         assert(res.body.data.dimensions.length === 3, "Should have 3 dims");
         commentMock.restore();
-    })
+    });
+
+    it('it should return all comments for a domain on query as a standard user with locator', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('count').returns(4);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        assert(response.data.count === response.data.comments.length, "Count should be valid");
+        res.should.have.status(200);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return all comments for a domain on query as a standard user with target id', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('count').returns(4);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        assert(response.data.count === response.data.comments.length, "Count should be valid");
+        res.should.have.status(200);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should throw an error when targetId or locator are missing', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('count').returns(4);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        const response = error.response.body;
+        error.response.should.have.status(400);
+        assert(response.code === 400, "Code included and is 400");
+        assert(response.data === 'Either a locator or targetId is required. If both provided, ID is used.', "Error message returned");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return published comments for a domain on query as a standard user with target id and status', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test',
+            status: 'published'}
+        ).chain('count').returns(2);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test',
+            status: 'published'}
+        ).chain('limit', 1000).returns(testMocks.findAllComments_published);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087&status=published`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        assert(response.data.count === response.data.comments.length, "Count should be valid");
+        res.should.have.status(200);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return pending comments for a domain on query as a standard user with target id and status', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test',
+            status: 'pending'}
+        ).chain('count').returns(2);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test',
+            status: 'pending'}
+        ).chain('limit', 1000).returns(testMocks.findAllComments_pending);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087&status=pending`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        assert(response.data.count === response.data.comments.length, "Count should be valid");
+        res.should.have.status(200);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return child comments for a domain on query as a standard user with target id and parent id', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: '5b09afee523e6e1957c83c76',
+            domain: 'test'}
+        ).chain('count').returns(1);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: '5b09afee523e6e1957c83c76',
+            domain: 'test'}
+        ).chain('limit', 1000).returns(testMocks.findAllCommentsOfParent_1);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087&parentId=5b09afee523e6e1957c83c76`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        assert(response.data.count === response.data.comments.length, "Count should be valid");
+        res.should.have.status(200);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should post a comment with standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const commStub = sinon.stub(Comment.prototype, 'save');
+        const targetMock = sinon.mock(Target);
+        const commentPost = {
+            "target_locator": "https://test",
+            "type": "user",
+            "comment": "This is a comment",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test', type: 'user'}).returns(testMocks.targetCreated);
+        commStub.returns(testMocks.commentCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/comment/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPost));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comment', "Type is comment");
+        res.should.have.status(200);
+        assert(response.data.target_id === '5b09ac18e1e7441830460087', "target id");
+        assert(response.data.creator === '58fc2095b33ef700014359af', "standard user id");
+        assert(response.data.comment === commentPost.comment, "comment is the same");
+        assert(response.data.dimensions.length === commentPost.dimensions.length, "dimensions the same");
+        assert(response.data.overall_rating === 4, "overall rating calculated");
+        assert(response.data.status === "pending", "should be pending state");
+        assert(response.data.parent_id === null, "should not have a parent");
+        commStub.restore();
+        targetMock.restore();
+    });
+
+    it('it should post a comment with standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const commStub = sinon.stub(Comment.prototype, 'save');
+        const targetMock = sinon.mock(Target);
+        const commentPost = {
+            "target_locator": "https://test",
+            "type": "user",
+            "comment": "This is a comment",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test', type: 'user'}).returns(testMocks.targetCreated);
+        commStub.returns(testMocks.commentCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/comment/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPost));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comment', "Type is comment");
+        res.should.have.status(200);
+        assert(response.data.target_id === '5b09ac18e1e7441830460087', "target id");
+        assert(response.data.creator === '58fc2095b33ef700014359af', "standard user id");
+        assert(response.data.comment === commentPost.comment, "comment is the same");
+        assert(response.data.dimensions.length === commentPost.dimensions.length, "dimensions the same");
+        assert(response.data.overall_rating === 4, "overall rating calculated");
+        assert(response.data.status === "pending", "should be pending state");
+        assert(response.data.parent_id === null, "should not have a parent");
+        commStub.restore();
+        targetMock.restore();
+    });
+
+    it('it should error on posting a comment with standard user who forgets target locator', async () => {
+        await authStub(testMocks.standardUser);
+        const commStub = sinon.stub(Comment.prototype, 'save');
+        const targetMock = sinon.mock(Target);
+        const commentPost = {
+            "type": "user",
+            "comment": "This is a comment",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test', type: 'user'}).returns(testMocks.targetCreated);
+        commStub.returns(testMocks.commentCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/comment/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPost));
+        const response = error.response.body;
+        error.response.should.have.status(400);
+        assert(response.code === 400, "should have code");
+        assert(response.data.isJoi === true, "this should fail matching schema");
+        assert(response.data.name === 'ValidationError', "this is a validation error");
+        commStub.restore();
+        targetMock.restore();
+    });
+
+    it('it should error on posting a comment with standard user who forgets type', async () => {
+        await authStub(testMocks.standardUser);
+        const commStub = sinon.stub(Comment.prototype, 'save');
+        const targetMock = sinon.mock(Target);
+        const commentPost = {
+            "target_locator": "https://test",
+            "comment": "This is a comment",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test', type: 'user'}).returns(testMocks.targetCreated);
+        commStub.returns(testMocks.commentCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/comment/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPost));
+        const response = error.response.body;
+        error.response.should.have.status(400);
+        assert(response.code === 400, "should have code");
+        assert(response.data.isJoi === true, "this should fail matching schema");
+        assert(response.data.name === 'ValidationError', "this is a validation error");
+        commStub.restore();
+        targetMock.restore();
+    });
+
+    it('it should error on posting a comment with standard user who forgets comment', async () => {
+        await authStub(testMocks.standardUser);
+        const commStub = sinon.stub(Comment.prototype, 'save');
+        const targetMock = sinon.mock(Target);
+        const commentPost = {
+            "target_locator": "https://test",
+            "type": "user",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test', type: 'user'}).returns(testMocks.targetCreated);
+        commStub.returns(testMocks.commentCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/comment/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPost));
+        const response = error.response.body;
+        error.response.should.have.status(400);
+        assert(response.code === 400, "should have code");
+        assert(response.data.isJoi === true, "this should fail matching schema");
+        assert(response.data.name === 'ValidationError', "this is a validation error");
+        commStub.restore();
+        targetMock.restore();
+    });
+
+    it('it should update a comment with PUT using a super user', async () => {
+        await authStub(testMocks.superUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        const commentPut = {
+            "_id": "1b09ac18e1e7441830460000",
+            "target_id": "5b09ac18e1e7441830460087",
+            "comment": "This is a comment",
+            "domain": "test",
+            "status": "published",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('findOne').returns(testMocks.commentCreated);
+        commentMock.expects('findOneAndUpdate').returns(testMocks.commentUpdated);
+        const [error, res] = await to(chai.request(app).put(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPut));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comment', "Type is comment");
+        res.should.have.status(200);
+        assert(response.data.target_id === '5b09ac18e1e7441830460087', "target id");
+        assert(response.data.creator === '58fc2095b33ef700014359af', "standard user id");
+        assert(response.data.comment === commentPut.comment, "comment is the same");
+        assert(response.data.dimensions.length === commentPut.dimensions.length, "dimensions the same");
+        assert(response.data.overall_rating === 4, "overall rating calculated");
+        assert(response.data.status === "published", "should be pending state");
+        assert(response.data.parent_id === null, "should not have a parent");
+        assert(response.data.__v === 1, "version");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should NOT update a comment with PUT using a standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        const commentPut = {
+            "_id": "1b09ac18e1e7441830460000",
+            "target_id": "5b09ac18e1e7441830460087",
+            "type": "user",
+            "comment": "This is a comment",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('findOne').returns(testMocks.commentCreated);
+        commentMock.expects('findOneAndUpdate').returns(testMocks.targetCreated);
+        const [error, res] = await to(chai.request(app).put(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPut));
+        const response = error.response.body;
+        error.response.should.have.status(401);
+        assert(response.code === 401, "401 forbidden");
+        assert(response.data === 'Must be commenter or admin to change this.', "401 message");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should update a comment with PUT using a standard user who created the comment', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        const commentPut = {
+            "_id": "1b09ac18e1e7441830460000",
+            "target_id": "5b09ac18e1e7441830460087",
+            "comment": "This is a comment",
+            "domain": "test",
+            "status": "published",
+            "dimensions": [
+                {
+                    "rating": 5,
+                    "name": "reliability"
+                },
+                {
+                    "rating": 2,
+                    "name": "fairness"
+                },
+                {
+                    "rating": 5,
+                    "name": "honesty"
+                }
+            ]
+        };
+        const newCommentCreated = testMocks.commentCreated;
+        const newCommentUpdated = testMocks.commentUpdated;
+        newCommentCreated.creator = '2b09b06b523e6e1957c83c6e';
+        newCommentUpdated.creator = '2b09b06b523e6e1957c83c6e';
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('findOne').returns(newCommentCreated);
+        commentMock.expects('findOneAndUpdate').returns(newCommentUpdated);
+        const [error, res] = await to(chai.request(app).put(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPut));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comment', "Type is comment");
+        res.should.have.status(200);
+        assert(response.data.target_id === '5b09ac18e1e7441830460087', "target id");
+        assert(response.data.creator === '2b09b06b523e6e1957c83c6e', "standard user id");
+        assert(response.data.comment === commentPut.comment, "comment is the same");
+        assert(response.data.dimensions.length === commentPut.dimensions.length, "dimensions the same");
+        assert(response.data.overall_rating === 4, "overall rating calculated");
+        assert(response.data.status === "published", "should be pending state");
+        assert(response.data.parent_id === null, "should not have a parent");
+        assert(response.data.__v === 1, "version");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
 });

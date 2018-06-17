@@ -98,7 +98,7 @@ export default {
     },
     async getComments(req, res) {
         try {
-            if (!req.query.locator && !req.query.targetId) responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
+            if (!req.query.locator && !req.query.targetId) return responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
             const tid = await dal.findTargetFromLocator(req.query, req.params.domain);
             if(tid.code) return responder.send(res, tid);
             const query = {

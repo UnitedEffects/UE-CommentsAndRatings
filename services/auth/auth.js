@@ -96,9 +96,11 @@ const authFactory = {
     async findToken(tokens, val, access) {
         try {
             const theToken = await find(tokens, val);
-            theToken.user['token'] = access;
-            theToken.user['expires'] = moment(theToken.created).add(12, 'hours');
-            theToken.user['token_created'] = theToken.created;
+            if(theToken) {
+                theToken.user['token'] = access;
+                theToken.user['expires'] = moment(theToken.created).add(12, 'hours');
+                theToken.user['token_created'] = theToken.created;
+            }
             return theToken;
         } catch (error) {
             log.error(error);
