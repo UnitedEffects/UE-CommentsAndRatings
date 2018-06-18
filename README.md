@@ -198,11 +198,7 @@ This service is fully docker compliant. You'll find the Dockerfile at the root d
 * cp ./config-changeme.js ./config.js
 * Update the config.js file to your needs(i.e. mongo connection, dimensions, etc...)
 * yarn
-* yarn test (WIP)
+* yarn test
 * yarn run dev
 * https://localhost:4040/api (docs)
 * https://localhost:4040/swagger (swagger and testing)
-
-## Work In Progress
-
-* Unit Tests are being built now

@@ -54,11 +54,13 @@ tokenSchema.pre('save', function(callback) {
     });
 });
 
-tokenSchema.methods.verifyToken = function(token, callback) {
-    bcrypt.compare(token, this.value, (err, isMatch) => {
-        if (err) return callback(err);
-        callback(null, isMatch);
-    });
+tokenSchema.methods.verifyTokenAsync = function(token) {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(token, this.value, (err, isMatch) => {
+            if (err) return reject(err);
+            return resolve(isMatch)
+        });
+    })
 };
 
 // Export the Mongoose model

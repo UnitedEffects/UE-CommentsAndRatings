@@ -31,17 +31,11 @@ router.get('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.getComment
 router.post('/comment/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.postComment);
 router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment);
 router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment);
+
 router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle, cache('2 minutes')], comApi.getOverallTarget);
 router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.createTarget);
 router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
-
-
-/**
- * todo
- * Add unit tests
- * Validate role permissions...
-*/
 
 /**
  * Log API Calls

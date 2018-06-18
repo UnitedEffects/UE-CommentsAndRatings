@@ -14,21 +14,8 @@ import log from '../log/logs';
 import config from '../../config';
 import helper from '../helper';
 
-function findToken (tokens, val) {
-    return new Promise(async (resolve, reject) => {
-        let theToken = null;
-        await Promise.all(tokens.map(async (token) => {
-            await token.verifyToken(val, (err, isMatch) => {
-                if(err) return reject(err);
-                if(isMatch) theToken = token;
-            });
-        }));
-        return resolve(theToken);
-    })
-}
-
 passport.use('bearer', new BearerStrategy(
-    (accessToken, callback) => {
+    async (accessToken, callback) => {
         try {
             if (!accessToken) return callback(null, false);
             const fullToken = Buffer.from(accessToken.replace(/%3D/g, '='), 'base64').toString('ascii');
@@ -41,34 +28,11 @@ passport.use('bearer', new BearerStrategy(
 
             if(!product) return callback(null, false);
             if(!domain) return callback(null, false);
-            Token.find({ user_id: userId, product_slug: product, domain_slug: domain })
-                .then((token)=>{
-                    if(token.length===0) return null;
-                    return findToken(token, tokenVal);
-                })
-                .then(token => {
-                    if (!token) {
-                        getBearerToken(accessToken, (err, result) => callback(err, result));
-                    } else {
-                        token.verifyToken(tokenVal, (err, isMatch) => {
-                            if (err) return callback(null, false);
-                            if (isMatch) {
-                                token.user['token'] = accessToken;
-                                token.user['expires'] = moment(token.created).add(12, 'hours');
-                                token.user['token_created'] = token.created;
-                                return callback(null, token.user);
-                            } else {
-                                //getting token
-                                getBearerToken(accessToken, (err, result) => callback(err, result));
-                            }
 
-                        });
-                    }
-                })
-                .catch(error => {
-                    error['detail']='Bearer Auth Validation Error';
-                    return callback(error, false);
-                });
+            const tokens  = await Token.find({ user_id: userId, product_slug: product, domain_slug: domain });
+            const token = await authFactory.findToken(tokens, tokenVal, accessToken);
+            if(!token) return getBearerToken(accessToken, (err, result) => callback(err, result));
+            return callback(null, token.user);
         }catch(error){
             error['detail']='Unhandled Error caught at Bearer Auth';
             log.error('Unhandled Error caught at Bearer Auth');
@@ -117,7 +81,32 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
+async function find (arr, val) {
+    let result = null;
+    for (let elm of arr) {
+        if(await elm.verifyTokenAsync(val)){
+            result = elm;
+            break;
+        }
+    }
+    return result;
+}
+
 const authFactory = {
+    async findToken(tokens, val, access) {
+        try {
+            const theToken = await find(tokens, val);
+            if(theToken) {
+                theToken.user['token'] = access;
+                theToken.user['expires'] = moment(theToken.created).add(12, 'hours');
+                theToken.user['token_created'] = theToken.created;
+            }
+            return theToken;
+        } catch (error) {
+            log.error(error);
+            return null;
+        }
+    },
     isBearerAuthenticated: passport.authenticate('bearer', { session: false }),
     saveToken(user, access, tokenVal, callback) {
         Token.find({user_id: user._id, product_slug: access.product, domain_slug: access.domain})

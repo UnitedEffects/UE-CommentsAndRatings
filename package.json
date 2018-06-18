@@ -1,6 +1,6 @@
 {
   "name": "ue-comments-and-ratings",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "private": false,
   "main": "app.js",
   "contributors": [
@@ -30,7 +30,7 @@
     "express": "^4.16.2",
     "install": "^0.10.1",
     "joi": "^13.2.0",
-    "moment": "^2.19.1",
+    "moment": "^2.22.2",
     "mongoose": "^4.13.8",
     "morgan": "^1.8.2",
     "npm": "^5.5.1",
@@ -51,6 +51,8 @@
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.2.1",
-    "mocha": "^3.3.0"
+    "mocha": "^3.3.0",
+    "sinon": "^5.0.10",
+    "sinon-mongoose": "^2.1.1"
   }
 }
