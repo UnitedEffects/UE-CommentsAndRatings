@@ -516,8 +516,8 @@ describe('app index route', () => {
                 }
             ]
         };
-        const newCommentCreated = testMocks.commentCreated;
-        const newCommentUpdated = testMocks.commentUpdated;
+        const newCommentCreated = JSON.parse(JSON.stringify(testMocks.commentCreated));
+        const newCommentUpdated = JSON.parse(JSON.stringify(testMocks.commentUpdated));
         newCommentCreated.creator = '2b09b06b523e6e1957c83c6e';
         newCommentUpdated.creator = '2b09b06b523e6e1957c83c6e';
         targetMock.expects('findOne').returns(testMocks.targetCreated);
@@ -536,6 +536,69 @@ describe('app index route', () => {
         assert(response.data.status === "published", "should be pending state");
         assert(response.data.parent_id === null, "should not have a parent");
         assert(response.data.__v === 1, "version");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should delete a comment using a super user', async () => {
+        await authStub(testMocks.superUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('findOne').returns(testMocks.commentCreated);
+        commentMock.expects('findOneAndRemove').returns(testMocks.commentUpdated);
+        const [error, res] = await to(chai.request(app).delete(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comment', "Type is comment");
+        res.should.have.status(200);
+        assert(response.data.target_id === '5b09ac18e1e7441830460087', "target id");
+        assert(response.data.creator === '58fc2095b33ef700014359af', "standard user id");
+        assert(response.data.overall_rating === 4, "overall rating calculated");
+        assert(response.data.status === "published", "should be pending state");
+        assert(response.data.parent_id === null, "should not have a parent");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should delete a comment using a standard user who created the comment', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        const newCommentCreated = JSON.parse(JSON.stringify(testMocks.commentCreated));
+        const newCommentUpdated = JSON.parse(JSON.stringify(testMocks.commentUpdated));
+        newCommentCreated.creator = '2b09b06b523e6e1957c83c6e';
+        newCommentUpdated.creator = '2b09b06b523e6e1957c83c6e';
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('findOne').returns(newCommentCreated);
+        commentMock.expects('findOneAndRemove').returns(newCommentUpdated);
+        const [error, res] = await to(chai.request(app).delete(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comment', "Type is comment");
+        res.should.have.status(200);
+        assert(response.data.target_id === '5b09ac18e1e7441830460087', "target id");
+        assert(response.data.creator === '2b09b06b523e6e1957c83c6e', "standard user id");
+        assert(response.data.overall_rating === 4, "overall rating calculated");
+        assert(response.data.status === "published", "should be pending state");
+        assert(response.data.parent_id === null, "should not have a parent");
+        assert(response.data.__v === 1, "version");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should NOT delete a comment using a standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('findOne').returns(testMocks.commentCreated);
+        commentMock.expects('findOneAndRemove').returns(testMocks.targetCreated);
+        const [error, res] = await to(chai.request(app).delete(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        const response = error.response.body;
+        error.response.should.have.status(401);
+        assert(response.code === 401, "401 forbidden");
+        assert(response.data === 'Must be commenter or admin to delete this.', "401 message");
         commentMock.restore();
         targetMock.restore();
     });
