@@ -32,10 +32,10 @@ router.post('/comment/:domain', [auth.isBearerAuthenticated, rbac.middle], comAp
 router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment);
 router.delete('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.deleteComment);
 
-router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle, cache('2 minutes')], comApi.getOverallTarget); //todo
-router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.createTarget); //todo
-router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget); //todo
-router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget); //todo
+router.get('/target/:domain/', [auth.isBearerAuthenticated, rbac.middle, cache('2 minutes')], comApi.getOverallTarget);
+router.post('/target/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.createTarget);
+router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.patchTarget);
+router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
 
 /**
  * Log API Calls

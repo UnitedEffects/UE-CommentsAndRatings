@@ -373,6 +373,14 @@ export default {
         domain: 'test',
         active: true
     },
+    targetUpdated: {
+        _id: "5b09ac18e1e7441830460087",
+        target_locator: 'https://test',
+        type: 'property',
+        created: "2018-05-26T18:45:00.000Z",
+        domain: 'test',
+        active: true
+    },
     commentCreated: {
         _id: '1b09ac18e1e7441830460000',
         target_id: "5b09ac18e1e7441830460087",
@@ -428,5 +436,19 @@ export default {
         ],
         overall_rating: 4,
         status: "published"
-    }
+    },
+    targetAggregateComments: [
+        {
+            "_id": "reliability",
+            "overall_rating": 5
+        },
+        {
+            "_id": "fairness",
+            "overall_rating": 2
+        },
+        {
+            "_id": "honesty",
+            "overall_rating": 3
+        }
+    ]
 }

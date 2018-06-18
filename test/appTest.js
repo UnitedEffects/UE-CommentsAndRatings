@@ -603,4 +603,179 @@ describe('app index route', () => {
         targetMock.restore();
     });
 
+    it('it should get aggregate comments and target using a standard user and locator', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('aggregate').withArgs([
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$limit": 1000 },
+            {   "$unwind": "$dimensions" },
+            {   "$group": {
+                _id: '$dimensions.name',
+                overall_rating: {$avg: "$dimensions.rating"}
+            }
+            }
+        ]).returns(testMocks.targetAggregateComments);
+        commentMock.expects('aggregate').withArgs([
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$limit": 1000 },
+            {   "$group": {
+                _id: '5b09ac18e1e7441830460087',
+                average_rating: {$avg: "$overall_rating"}
+            }
+            }
+        ]).returns([{average_rating: 3.5}]);
+        const [error, res] = await to(chai.request(app).get(`/api/target/test?locator=https://test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data._id === '5b09ac18e1e7441830460087', "ID should be the same");
+        assert(response.data.target_locator === 'https://test', "Target locator");
+        assert(response.data.average_rating === 3.5, "average rating");
+        assert(response.data.dimensions.length === 3, "dims are 3 long");
+        assert(response.data.dimensions[0].name === 'honest' || 'fairness' || 'reliability', "make sure we have the model as name and not _id on dims");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should get aggregate comments and target using a standard user and targetId', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('aggregate').withArgs([
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$limit": 1000 },
+            {   "$unwind": "$dimensions" },
+            {   "$group": {
+                _id: '$dimensions.name',
+                overall_rating: {$avg: "$dimensions.rating"}
+            }
+            }
+        ]).returns(testMocks.targetAggregateComments);
+        commentMock.expects('aggregate').withArgs([
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$limit": 1000 },
+            {   "$group": {
+                _id: '5b09ac18e1e7441830460087',
+                average_rating: {$avg: "$overall_rating"}
+            }
+            }
+        ]).returns([{average_rating: 3.5}]);
+        const [error, res] = await to(chai.request(app).get(`/api/target/test?targetId=5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data._id === '5b09ac18e1e7441830460087', "ID should be the same");
+        assert(response.data.target_locator === 'https://test', "Target locator");
+        assert(response.data.average_rating === 3.5, "average rating");
+        assert(response.data.dimensions.length === 3, "dims are 3 long");
+        assert(response.data.dimensions[0].name === 'honesty' || 'fairness' || 'reliability', "make sure we have the model as name and not _id on dims");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should update a target with patch using a super user', async () => {
+        await authStub(testMocks.superUser);
+        const targetMock = sinon.mock(Target);
+        const targetUpdate = {
+            type: 'property'
+        };
+        targetMock.expects('findOneAndUpdate').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}, {type: 'property'}, {new: true}).returns(testMocks.targetUpdated);
+        const [error, res] = await to(chai.request(app).patch(`/api/target/test/5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(targetUpdate));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data.type === 'property', "type changed");
+        assert(response.data._id === '5b09ac18e1e7441830460087', "id the same");
+        targetMock.restore();
+    });
+
+    it('it should NOT update a target with patch using a standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const targetMock = sinon.mock(Target);
+        const targetUpdate = {
+            type: 'property'
+        };
+        targetMock.expects('findOneAndUpdate').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}, {type: 'property'}, {new: true}).returns(testMocks.targetUpdated);
+        const [error, res] = await to(chai.request(app).patch(`/api/target/test/5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(targetUpdate));
+        error.response.should.have.status(401);
+        targetMock.restore();
+    });
+
+    it('it should delete a target using a super user', async () => {
+        await authStub(testMocks.superUser);
+        const targetMock = sinon.mock(Target);
+        const commentMock = sinon.mock(Comment);
+        commentMock.expects('deleteMany').returns(true);
+        targetMock.expects('findOneAndRemove').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}).returns(testMocks.targetCreated);
+        const [error, res] = await to(chai.request(app).delete(`/api/target/test/5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data.type === 'user', "type changed");
+        assert(response.data.domain === 'test', "domain");
+        assert(response.data._id === '5b09ac18e1e7441830460087', "id the same");
+        targetMock.restore();
+        commentMock.restore();
+    });
+
+    it('it should NOT delete a target using a standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const targetMock = sinon.mock(Target);
+        const commentMock = sinon.mock(Comment);
+        commentMock.expects('deleteMany').returns(true);
+        targetMock.expects('findOneAndRemove').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}).returns(testMocks.targetUpdated);
+        const [error, res] = await to(chai.request(app).delete(`/api/target/test/5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        error.response.should.have.status(401);
+        targetMock.restore();
+        commentMock.restore();
+    });
+
+    it('it should post a target with super user', async () => {
+        await authStub(testMocks.superUser);
+        const targetStub = sinon.stub(Target.prototype, 'save');
+        const targetPost = {
+            "target_locator": "https://test",
+            "type": "user"
+        };
+        targetStub.returns(testMocks.targetCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/target/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(targetPost));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data._id, "there should be a generated id");
+        assert(response.data.type === 'user', "type is user");
+        assert(response.data.domain === 'test', "test domain");
+        assert(response.data.active === true, "its active");
+        targetStub.restore();
+    });
+
+    it('it should post a target with standard user', async () => {
+        await authStub(testMocks.standardUser);
+        const targetStub = sinon.stub(Target.prototype, 'save');
+        const targetPost = {
+            "target_locator": "https://test",
+            "type": "user"
+        };
+        targetStub.returns(testMocks.targetCreated);
+        const [error, res] = await to(chai.request(app).post(`/api/target/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(targetPost));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data._id, "there should be a generated id");
+        assert(response.data.type === 'user', "type is user");
+        assert(response.data.domain === 'test', "test domain");
+        assert(response.data.active === true, "its active");
+        targetStub.restore();
+    });
+
 });
