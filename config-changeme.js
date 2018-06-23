@@ -15,6 +15,7 @@ const config = {
      * Configure the below for your needs. Each type is a general target for comments. Dimensions allow
      * a granular review.
      */
+    APPROVAL_STATUS_WORD: 'approved', //THIS MUST MATCH THE BELOW
     COMMENT_STATUS: ['pending', 'approved', 'rejected'],
     COMMENT_DEFAULT_STATUS: 'pending',
     TARGET_TYPES: ['user', 'property', 'merchant'],

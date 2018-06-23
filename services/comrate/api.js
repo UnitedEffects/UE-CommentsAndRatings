@@ -100,7 +100,7 @@ export default {
         try {
             if (!req.query.locator && !req.query.targetId) return responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
             const tid = await dal.findTargetFromLocator(req.query, req.params.domain);
-            if(tid.code) return responder.send(res, tid);
+            if(tid.code) return responder.send(res, send.success204(tid.data));
             const query = {
                 target_id: tid,
                 parent_id: req.query.parentId,
@@ -136,7 +136,7 @@ export default {
             comment.created = myComment.data.created;
             comment.modified_by = (req.user) ? req.user._id : 'anonymous';
             if(!comment.domain) comment.domain = myComment.data.domain;
-            comment.__v = myComment.data.__v++;
+            comment.__v = (myComment.data.__v) ? myComment.data.__v++ : comment.__v = 1;
             delete comment._id;
             delete comment.overall_rating;
             delete comment.modified;
@@ -146,7 +146,7 @@ export default {
                 creator: Joi.string().required(),
                 modified_by: Joi.string().required(),
                 parent_id: Joi.string(),
-                __v: Joi.number(),
+                __v: Joi.number().optional(),
                 domain: Joi.string().required(),
                 status: Joi.string(),
                 comment: Joi.string().required(),
@@ -179,7 +179,7 @@ export default {
         try {
             if (!req.query.locator && !req.query.targetId) responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
             const target = JSON.parse(JSON.stringify(await dal.getTargetByLocOrId(req.query, req.params.domain)));
-            if(target.code === 404) return responder.send(res, target);
+            if(target.code === 404) return responder.send(res, send.success204(target.data));
             target.data.dimensions = [];
             const overallCalc = await dal.calculateOverall(target.data._id);
             await Promise.all(overallCalc.map((dim) => {

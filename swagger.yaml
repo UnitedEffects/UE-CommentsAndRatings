@@ -15,6 +15,10 @@ tags:
     externalDocs:
       description: Learn more about United Effects
       url: 'http://unitedeffects.com'
+  - name: target
+    description: Manage targets of comments and ratings
+  - name: dimensions
+    description: Retrieve dimensions configured for comments
 schemes:
   - http
   - https
@@ -161,8 +165,8 @@ paths:
             $ref: '#/definitions/ApiResponseComments'
         '400':
           description: Invalid code supplied
-        '404':
-          description: Log not found
+        '204':
+          description: No target found
       security:
         - UEAuth: []
   /comment/{domain}/{id}:
@@ -328,8 +332,8 @@ paths:
             $ref: '#/definitions/ApiResponseTarget'
         '400':
           description: Invalid code supplied
-        '404':
-          description: Log not found
+        '204':
+          description: Target not found
       security:
         - UEAuth: []
     post:
@@ -369,8 +373,8 @@ paths:
     delete:
       tags:
         - target
-      summary: Delete a specific target. This will orphan comments.
-      description: Delete a specific target. This will orphan comments.
+      summary: Delete a specific target.
+      description: Delete a specific target.
       operationId: deleteTarget
       produces:
         - application/json
@@ -434,6 +438,92 @@ paths:
           description: Log not found
       security:
         - UEAuth: []
+  /dimensions:
+    get:
+      tags:
+        - dimensions
+      summary: Return config definition of all dimensions
+      description: Return config definition of all dimensions
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /dimensions/types:
+    get:
+      tags:
+        - dimensions
+      summary: Return all types available
+      description: Return all types available
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /dimensions/type/{type}:
+    get:
+      tags:
+        - dimensions
+      summary: Return all dimensions associated to a type
+      description: Return all dimensions associated to a type
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: path
+          description: A type from config file
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+  /dimensions/type/{type}/dimension/{dimension}:
+    get:
+      tags:
+        - dimensions
+      summary: Validate that a specific type and dimension combination is valid
+      description: Validate that a specific type and dimension combination is valid
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: path
+          description: A type from config file
+          required: true
+          type: string
+        - name: dimension
+          in: path
+          description: A dimension from config file
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid code supplied
+        '404':
+          description: Log not found
+      security:
+        - UEAuth: []
+
 securityDefinitions:
   UEAuth:
     type: apiKey
@@ -536,6 +626,7 @@ definitions:
         type: string
       status:
         type: string
+        description: 'pending, approved, etc'
       domain:
         type: string
       dimensions:

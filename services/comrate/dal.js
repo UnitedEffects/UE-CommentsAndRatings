@@ -6,6 +6,7 @@ import log from '../log/logs';
 import send from '../response';
 import Target from './models/target';
 import Comment from './models/comment';
+const config = require('../../config');
 
 export default {
     async createTarget(data) {
@@ -38,7 +39,7 @@ export default {
     },
     async patchTarget(data) {
         try {
-            return send.set200(await Target.findOneAndUpdate({ _id: data.id, domain: data.domain }, data.update, { new: true }), 'Target');
+            return send.set200(await Target.findOneAndUpdate({ _id: data.id, domain: data.domain }, data.update, { new: true, runValidators: true }), 'Target');
         } catch (error) {
             log.detail('ERROR', 'Could not save target', error);
             if(error.code===11000) throw send.fail409('Could not make this update, duplicate entry would result.');
@@ -128,7 +129,7 @@ export default {
     async calculateOverall(id) {
         try {
             return Comment.aggregate([
-                {   "$match": { "target_id": id.toString(), parent_id: undefined, status: "published" } },
+                {   "$match": { "target_id": id.toString(), parent_id: undefined, status: config.APPROVAL_STATUS_WORD } },
                 {   "$limit": 1000 },
                 {   "$unwind": "$dimensions" },
                 {   "$group": {
@@ -145,7 +146,7 @@ export default {
     async calculateAverageRating(id) {
         try {
             return Comment.aggregate([
-                {   "$match": { "target_id": id.toString(), parent_id: undefined, status: "published" } },
+                {   "$match": { "target_id": id.toString(), parent_id: undefined, status: config.APPROVAL_STATUS_WORD } },
                 {   "$limit": 1000 },
                 {   "$group": {
                     _id: id,
@@ -170,7 +171,7 @@ export default {
         try {
             const overall = await returnOverAllForOneComment(data);
             if(overall) data.overall_rating = overall;
-            const result = await Comment.findOneAndUpdate({ _id: id, domain: domain }, data, { new: true });
+            const result = await Comment.findOneAndUpdate({ _id: id, domain: domain }, data, { new: true, runValidators: true });
             if(!result) return send.fail404({ id: id, domain: domain, update: data });
             return send.set200(result, 'Comment');
         } catch (error) {

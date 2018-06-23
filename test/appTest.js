@@ -14,6 +14,7 @@ const Auth = require('../services/auth/auth').default;
 const assert = chai.assert;
 const tokenMock = sinon.mock(Token);
 const authMock = sinon.mock(Auth);
+const config = require('../config');
 
 chai.should();
 chai.use(chaiHttp);
@@ -73,6 +74,28 @@ describe('app index route', () => {
         commentMock.restore();
     });
 
+    it('it should return 204 from get all comments when the target does not exist', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').returns(undefined);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('count').returns(4);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://testNotThere`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        res.should.have.status(204);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
     it('it should return all comments for a domain on query as a standard user with locator', async () => {
         await authStub(testMocks.standardUser);
         const commentMock = sinon.mock(Comment);
@@ -88,6 +111,31 @@ describe('app index route', () => {
             parent_id: undefined,
             domain: 'test' }
         ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        assert(response.data.count === response.data.comments.length, "Count should be valid");
+        res.should.have.status(200);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return 200 with empty comments when target exists but no comments', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('count').returns(0);
+        commentMock.expects('find').withArgs({
+            target_id: '5b09ac18e1e7441830460087',
+            parent_id: undefined,
+            domain: 'test' }
+        ).chain('limit', 1000).returns([]);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -267,12 +315,13 @@ describe('app index route', () => {
         targetMock.restore();
     });
 
-    it('it should post a comment with standard user', async () => {
+    it('it should post a comment with standard user when no target exists yet', async () => {
         await authStub(testMocks.standardUser);
         const commStub = sinon.stub(Comment.prototype, 'save');
+        const targStub = sinon.stub(Target.prototype, 'save');
         const targetMock = sinon.mock(Target);
         const commentPost = {
-            "target_locator": "https://test",
+            "target_locator": "https://test2",
             "type": "user",
             "comment": "This is a comment",
             "dimensions": [
@@ -290,8 +339,12 @@ describe('app index route', () => {
                 }
             ]
         };
-        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test', type: 'user'}).returns(testMocks.targetCreated);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test2', domain: 'test', type: 'user'}).returns(undefined);
         commStub.returns(testMocks.commentCreated);
+        const newTargetCreated = JSON.parse(JSON.stringify(testMocks.targetCreated));
+        newTargetCreated.target_locator = 'https://test2';
+        newTargetCreated._id = '5b09ac18e1e7441830460088';
+        targStub.returns(newTargetCreated);
         const [error, res] = await to(chai.request(app).post(`/api/comment/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPost));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -306,6 +359,7 @@ describe('app index route', () => {
         assert(response.data.parent_id === null, "should not have a parent");
         commStub.restore();
         targetMock.restore();
+        targStub.restore();
     });
 
     it('it should error on posting a comment with standard user who forgets target locator', async () => {
@@ -603,11 +657,11 @@ describe('app index route', () => {
         targetMock.restore();
     });
 
-    it('it should get aggregate comments and target using a standard user and locator', async () => {
+    it('it should return 204 on aggregate call when target does not exist', async () => {
         await authStub(testMocks.standardUser);
         const commentMock = sinon.mock(Comment);
         const targetMock = sinon.mock(Target);
-        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        targetMock.expects('findOne').returns(undefined);
         commentMock.expects('aggregate').withArgs([
             {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
             {   "$limit": 1000 },
@@ -620,6 +674,56 @@ describe('app index route', () => {
         ]).returns(testMocks.targetAggregateComments);
         commentMock.expects('aggregate').withArgs([
             {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$limit": 1000 },
+            {   "$group": {
+                _id: '5b09ac18e1e7441830460087',
+                average_rating: {$avg: "$overall_rating"}
+            }
+            }
+        ]).returns([{average_rating: 3.5}]);
+        const [error, res] = await to(chai.request(app).get(`/api/target/test?locator=https://testNotThere`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        res.should.have.status(204);
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return 200 on aggregate target even when there are no comments', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://testFake', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('aggregate').returns([]);
+        commentMock.expects('aggregate').returns([]);
+        const [error, res] = await to(chai.request(app).get(`/api/target/test?locator=https://testFake`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Target', "Type is Target");
+        res.should.have.status(200);
+        assert(response.data._id === '5b09ac18e1e7441830460087', "ID should be the same");
+        assert(response.data.target_locator === 'https://test', "Target locator");
+        assert(response.data.dimensions.length === 0, "dims are 3 long");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should get aggregate comments and target using a standard user and locator', async () => {
+        await authStub(testMocks.standardUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').returns(testMocks.targetCreated);
+        commentMock.expects('aggregate').withArgs([
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: config.APPROVAL_STATUS_WORD } },
+            {   "$limit": 1000 },
+            {   "$unwind": "$dimensions" },
+            {   "$group": {
+                _id: '$dimensions.name',
+                overall_rating: {$avg: "$dimensions.rating"}
+            }
+            }
+        ]).returns(testMocks.targetAggregateComments);
+        commentMock.expects('aggregate').withArgs([
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: config.APPROVAL_STATUS_WORD } },
             {   "$limit": 1000 },
             {   "$group": {
                 _id: '5b09ac18e1e7441830460087',
@@ -647,7 +751,7 @@ describe('app index route', () => {
         const targetMock = sinon.mock(Target);
         targetMock.expects('findOne').returns(testMocks.targetCreated);
         commentMock.expects('aggregate').withArgs([
-            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: config.APPROVAL_STATUS_WORD } },
             {   "$limit": 1000 },
             {   "$unwind": "$dimensions" },
             {   "$group": {
@@ -657,7 +761,7 @@ describe('app index route', () => {
             }
         ]).returns(testMocks.targetAggregateComments);
         commentMock.expects('aggregate').withArgs([
-            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: "published" } },
+            {   "$match": { "target_id": '5b09ac18e1e7441830460087', parent_id: undefined, status: config.APPROVAL_STATUS_WORD } },
             {   "$limit": 1000 },
             {   "$group": {
                 _id: '5b09ac18e1e7441830460087',
@@ -685,9 +789,9 @@ describe('app index route', () => {
         const targetUpdate = {
             type: 'property'
         };
-        targetMock.expects('findOneAndUpdate').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}, {type: 'property'}, {new: true}).returns(testMocks.targetUpdated);
+        targetMock.expects('findOneAndUpdate').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}, {type: 'property'}, {new: true, runValidators: true}).returns(testMocks.targetUpdated);
         const [error, res] = await to(chai.request(app).patch(`/api/target/test/5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(targetUpdate));
-        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        if(error) return assert.fail("No error", error, "ERROR ON PATCH COMMENTS");
         const response = res.body;
         assert(response.type === 'Target', "Type is Target");
         res.should.have.status(200);
@@ -702,7 +806,7 @@ describe('app index route', () => {
         const targetUpdate = {
             type: 'property'
         };
-        targetMock.expects('findOneAndUpdate').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}, {type: 'property'}, {new: true}).returns(testMocks.targetUpdated);
+        targetMock.expects('findOneAndUpdate').withArgs({_id: '5b09ac18e1e7441830460087', domain: 'test'}, {type: 'property'}, {new: true, runValidators: true}).returns(testMocks.targetUpdated);
         const [error, res] = await to(chai.request(app).patch(`/api/target/test/5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(targetUpdate));
         error.response.should.have.status(401);
         targetMock.restore();

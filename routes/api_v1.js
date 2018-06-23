@@ -38,6 +38,38 @@ router.patch('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], c
 router.delete('/target/:domain/:id', [auth.isBearerAuthenticated, rbac.middle], comApi.deleteTarget);
 
 /**
+ * Dimensions API
+ */
+router.get('/dimensions/', auth.isBearerAuthenticated, (req, res) => {
+    res.json(config.TARGET_DIMENSIONS)
+});
+router.get('/dimensions/types', auth.isBearerAuthenticated, async (req, res) => {
+    const typeArray = [];
+    await config.TARGET_DIMENSIONS.map((dim) => {
+        typeArray.push(dim.type);
+    });
+    return res.json(typeArray);
+});
+router.get('/dimensions/type/:type', auth.isBearerAuthenticated, async (req, res) => {
+    let typeDims = {};
+    let status = 404;
+    await config.TARGET_DIMENSIONS.map((dim) => {
+        if(req.params.type === dim.type) {
+            status = 200;
+            typeDims = JSON.parse(JSON.stringify(dim));
+        }
+    });
+    return res.status(status).json(typeDims);
+});
+router.get('/dimensions/type/:type/dimension/:dimension', auth.isBearerAuthenticated, async (req, res) => {
+    let status = 404;
+    await config.TARGET_DIMENSIONS.map((dim) => {
+        if(req.params.type === dim.type && dim.dimensions.includes(req.params.dimension)) status = 200;
+    });
+    return res.status(status).json((status === 200) ? {valid: true} : {valid: false});
+});
+
+/**
  * Log API Calls
  */
 router.get('/logs', auth.isBearerAuthenticated, log.getLogs);
