@@ -25,8 +25,8 @@ router.get('/version', (req,res) => {
         currentMaintainers: pJson.contributors
     });
 });
-
-router.get('/comments/:domain', [auth.isBearerAuthenticated, rbac.middle, cache('2 minutes')], comApi.getComments);
+// [auth.isBearerAuthenticated, rbac.middle, cache('0 minutes')]
+router.get('/comments/:domain', comApi.getComments);
 router.get('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.getComment);
 router.post('/comment/:domain', [auth.isBearerAuthenticated, rbac.middle], comApi.postComment);
 router.put('/comment/:domain/:id', auth.isBearerAuthenticated, comApi.putComment);

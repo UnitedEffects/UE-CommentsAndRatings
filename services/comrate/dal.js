@@ -103,6 +103,27 @@ export default {
             throw send.fail400(error);
         }
     },
+    async getComments_WIP(query) {
+        try {
+            const count = await Comment.find(query).count();
+            console.info(Comment.collection.name);
+            console.info(query);
+            const comments = await Comment.aggregate([
+                {   "$match": { "target_id": query.target_id.toString(), "parent_id": (query.parent_id) ? query.parent_id.toString() : undefined, "domain": query.domain.toString() } },
+                {   "$limit": 1000 },
+                {   "$lookup": {
+                    "from": Comment.collection.name,
+                    "localField": "_id",
+                    "foreignField": "parent_id",
+                    "as":"children"
+                }}
+            ]);
+            console.info(comments);
+            return send.set200({ count: count, comments: comments}, 'Comments');
+        } catch (error) {
+            throw send.fail400(error);
+        }
+    },
     async getComment(id, domain) {
         try {
             const com = await Comment.findOne({ _id: id, domain: domain });
