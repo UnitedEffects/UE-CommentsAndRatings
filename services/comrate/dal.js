@@ -6,6 +6,7 @@ import log from '../log/logs';
 import send from '../response';
 import Target from './models/target';
 import Comment from './models/comment';
+import mongoose from 'mongoose';
 const config = require('../../config');
 
 export default {
@@ -86,15 +87,21 @@ export default {
     },
     async findTargetFromLocator(query, domain) {
         try {
-            if(query.targetId) return query.targetId;
-            const target = await Target.findOne({ target_locator: query.locator, domain: domain });
+            let q = {};
+            if(query.targetId) {
+                q._id = query.targetId;
+            }else{
+                q.target_locator = query.locator;
+                q.domain = domain;
+            }
+            const target = await Target.findOne(q);
             if(!target) return send.fail404({ target_locator: query.locator, domain: domain });
             return target._id;
         } catch (error) {
             throw send.fail400(error);
         }
     },
-    async getComments(query) {
+    async getComments_1(query) {
         try {
             const count = await Comment.find(query).count();
             const comments = await Comment.find(query).limit(1000);
@@ -103,22 +110,25 @@ export default {
             throw send.fail400(error);
         }
     },
-    async getComments_WIP(query) {
+    async getComments(query) {
         try {
             const count = await Comment.find(query).count();
-            console.info(Comment.collection.name);
-            console.info(query);
-            const comments = await Comment.aggregate([
-                {   "$match": { "target_id": query.target_id.toString(), "parent_id": (query.parent_id) ? query.parent_id.toString() : undefined, "domain": query.domain.toString() } },
+            const match = JSON.parse(JSON.stringify(query));
+            if(!query.parent_id) match.parent_id = undefined;
+            else match.parent_id = mongoose.Types.ObjectId(query.parent_id);
+            const aggQuery = [
+                {   "$match": match },
                 {   "$limit": 1000 },
-                {   "$lookup": {
-                    "from": Comment.collection.name,
-                    "localField": "_id",
-                    "foreignField": "parent_id",
-                    "as":"children"
-                }}
-            ]);
-            console.info(comments);
+                {   "$lookup":
+                    {
+                        "from": Comment.collection.name,
+                        "localField": "_id",
+                        "foreignField": "parent_id",
+                        "as":"children"
+                    }
+                }
+            ];
+            const comments = await Comment.aggregate(aggQuery);
             return send.set200({ count: count, comments: comments}, 'Comments');
         } catch (error) {
             throw send.fail400(error);

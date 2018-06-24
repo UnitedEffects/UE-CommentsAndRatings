@@ -127,8 +127,8 @@ paths:
     get:
       tags:
         - comments
-      summary: Get all comments (parents by default) for a target.
-      description: Get all comments (parents by default) for a target. Limits return to 1000 but also gives a total count beyond that limit.
+      summary: Get all comments (parents and first level children by default) for a target.
+      description: Get all comments (parents and first level children by default) for a target. Limits return to 1000 but also gives a total count beyond that limit.
       operationId: getComments
       produces:
         - application/json
@@ -675,6 +675,11 @@ definitions:
       status:
         type: string
         description: see config for options
+      children:
+        type: array
+        items:
+          type: object
+        description: on Get All this will be an array of first order children
   ApiResponse:
     type: object
     properties:

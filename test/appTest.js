@@ -84,11 +84,7 @@ describe('app index route', () => {
             parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test' }
-        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://testNotThere`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         res.should.have.status(204);
@@ -106,11 +102,7 @@ describe('app index route', () => {
             parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test' }
-        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -131,11 +123,7 @@ describe('app index route', () => {
             parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(0);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test' }
-        ).chain('limit', 1000).returns([]);
+        commentMock.expects('aggregate').returns([]);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?locator=https://test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -150,17 +138,13 @@ describe('app index route', () => {
         await authStub(testMocks.standardUser);
         const commentMock = sinon.mock(Comment);
         const targetMock = sinon.mock(Target);
-        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
             parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test' }
-        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -181,11 +165,7 @@ describe('app index route', () => {
             parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test' }
-        ).chain('limit', 1000).returns(testMocks.findAllComments_mixed);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         const response = error.response.body;
         error.response.should.have.status(400);
@@ -199,19 +179,14 @@ describe('app index route', () => {
         await authStub(testMocks.standardUser);
         const commentMock = sinon.mock(Comment);
         const targetMock = sinon.mock(Target);
-        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
             parent_id: undefined,
             domain: 'test',
             status: 'published'}
         ).chain('count').returns(2);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test',
-            status: 'published'}
-        ).chain('limit', 1000).returns(testMocks.findAllComments_published);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_published);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087&status=published`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -226,19 +201,14 @@ describe('app index route', () => {
         await authStub(testMocks.standardUser);
         const commentMock = sinon.mock(Comment);
         const targetMock = sinon.mock(Target);
-        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
             parent_id: undefined,
             domain: 'test',
             status: 'pending'}
         ).chain('count').returns(2);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
-            domain: 'test',
-            status: 'pending'}
-        ).chain('limit', 1000).returns(testMocks.findAllComments_pending);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_pending);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087&status=pending`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -253,17 +223,13 @@ describe('app index route', () => {
         await authStub(testMocks.standardUser);
         const commentMock = sinon.mock(Comment);
         const targetMock = sinon.mock(Target);
-        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
             parent_id: '5b09afee523e6e1957c83c76',
             domain: 'test'}
         ).chain('count').returns(1);
-        commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: '5b09afee523e6e1957c83c76',
-            domain: 'test'}
-        ).chain('limit', 1000).returns(testMocks.findAllCommentsOfParent_1);
+        commentMock.expects('aggregate').returns(testMocks.findAllCommentsOfParent_1);
         const [error, res] = await to(chai.request(app).get(`/api/comments/test?targetId=5b09ac18e1e7441830460087&parentId=5b09afee523e6e1957c83c76`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
         if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
         const response = res.body;
@@ -493,7 +459,7 @@ describe('app index route', () => {
         commentMock.expects('findOne').returns(testMocks.commentCreated);
         commentMock.expects('findOneAndUpdate').returns(testMocks.commentUpdated);
         const [error, res] = await to(chai.request(app).put(`/api/comment/test/1b09ac18e1e7441830460000`).set('Authorization', `Bearer ${testMocks.testAccessToken}`).send(commentPut));
-        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        if(error) return assert.fail("No error", error, "ERROR ON PUT COMMENT");
         const response = res.body;
         assert(response.type === 'Comment', "Type is comment");
         res.should.have.status(200);

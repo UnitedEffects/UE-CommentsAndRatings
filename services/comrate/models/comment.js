@@ -18,7 +18,7 @@ const commentSchema = new mongoose.Schema({
         type: Date,
         default: moment().format('LLLL')
     },
-    parent_id: String,
+    parent_id: mongoose.Schema.Types.ObjectId,
     modified_by: String,
     comment: String,
     domain: {
