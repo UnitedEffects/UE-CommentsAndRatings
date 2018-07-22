@@ -3,6 +3,7 @@
  */
 
 import Joi from 'joi';
+import moment from 'moment';
 import responder from '../responder';
 import send from '../response';
 import dal from './dal';
@@ -70,6 +71,8 @@ export default {
     async postComment(req, res) {
         try {
             const comment = req.body;
+            if (req.body.created) delete req.body.created;
+            if (req.body.modified) delete req.body.modified;
             comment.domain = req.params.domain;
             comment.creator = (req.user) ? req.user._id : 'anonymous';
             comment.modified_by = (req.user) ? req.user._id : 'anonymous';
@@ -137,14 +140,15 @@ export default {
             comment.modified_by = (req.user) ? req.user._id : 'anonymous';
             if(!comment.domain) comment.domain = myComment.data.domain;
             comment.__v = (myComment.data.__v) ? myComment.data.__v++ : comment.__v = 1;
+            comment.modified = moment().format('LLLL');
             delete comment._id;
             delete comment.overall_rating;
-            delete comment.modified;
             const schema = Joi.object({ allowUnknown: false }).keys({
                 target_id: Joi.string().required(),
                 created: Joi.date(),
                 creator: Joi.string().required(),
                 modified_by: Joi.string().required(),
+                modified: Joi.string(),
                 parent_id: Joi.string(),
                 __v: Joi.number().optional(),
                 domain: Joi.string().required(),

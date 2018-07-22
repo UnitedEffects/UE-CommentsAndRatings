@@ -11,6 +11,7 @@ const config = {
     PRODUCT_SLUG: process.env.PRODUCT_SLUG || 'your_product_slug',
     IMPLEMENTER: process.env.IMPLEMENTER || 'United Effects LLC',
     BASE_ACCESS: process.env.BASE_ACCESS || 'guest',
+    CACHE: process.env.CACHE || '2 minutes',
     /**
      * Configure the below for your needs. Each type is a general target for comments. Dimensions allow
      * a granular review.
