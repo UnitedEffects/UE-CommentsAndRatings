@@ -22,6 +22,7 @@ export default {
         try{
             const target = req.body;
             target.domain = req.params.domain;
+            if (target.created) delete target.created;
             const schema = Joi.object({ allowUnknown: false }).keys({
                 target_locator: Joi.string().required(),
                 type: Joi.string().valid(config.TARGET_TYPES).required(),
