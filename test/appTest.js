@@ -99,7 +99,6 @@ describe('app index route', () => {
         targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
         commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
@@ -120,7 +119,6 @@ describe('app index route', () => {
         targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(0);
         commentMock.expects('aggregate').returns([]);
@@ -141,7 +139,6 @@ describe('app index route', () => {
         targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
         commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
@@ -161,8 +158,6 @@ describe('app index route', () => {
         const targetMock = sinon.mock(Target);
         targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
-            target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
             domain: 'test' }
         ).chain('count').returns(4);
         commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
@@ -170,7 +165,25 @@ describe('app index route', () => {
         const response = error.response.body;
         error.response.should.have.status(400);
         assert(response.code === 400, "Code included and is 400");
-        assert(response.data === 'Either a locator or targetId is required. If both provided, ID is used.', "Error message returned");
+        assert(response.data === 'Unless you are an admin, either a locator or targetId is required. If both provided, ID is used.', "Error message returned");
+        commentMock.restore();
+        targetMock.restore();
+    });
+
+    it('it should return all comments across targets if you are and admin when targetId or locator are missing', async () => {
+        await authStub(testMocks.superUser);
+        const commentMock = sinon.mock(Comment);
+        const targetMock = sinon.mock(Target);
+        targetMock.expects('findOne').withArgs({target_locator: 'https://test', domain: 'test'}).returns(testMocks.targetCreated);
+        commentMock.expects('find').withArgs({
+            domain: 'test2' }
+        ).chain('count').returns(4);
+        commentMock.expects('aggregate').returns(testMocks.findAllComments_mixed);
+        const [error, res] = await to(chai.request(app).get(`/api/comments/test2`).set('Authorization', `Bearer ${testMocks.testAccessToken}`));
+        if(error) return assert.fail("No error", error, "ERROR ON GET COMMENTS");
+        const response = res.body;
+        assert(response.type === 'Comments', "Type is comment");
+        res.should.have.status(200);
         commentMock.restore();
         targetMock.restore();
     });
@@ -182,7 +195,6 @@ describe('app index route', () => {
         targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
             domain: 'test',
             status: 'published'}
         ).chain('count').returns(2);
@@ -204,7 +216,6 @@ describe('app index route', () => {
         targetMock.expects('findOne').withArgs({_id: '5b09ac18e1e7441830460087'}).returns(testMocks.targetCreated);
         commentMock.expects('find').withArgs({
             target_id: '5b09ac18e1e7441830460087',
-            parent_id: undefined,
             domain: 'test',
             status: 'pending'}
         ).chain('count').returns(2);
@@ -847,5 +858,4 @@ describe('app index route', () => {
         assert(response.data.active === true, "its active");
         targetStub.restore();
     });
-
 });
