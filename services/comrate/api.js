@@ -102,14 +102,23 @@ export default {
     },
     async getComments(req, res) {
         try {
-            if (!req.query.locator && !req.query.targetId) return responder.send(res, send.fail400('Either a locator or targetId is required. If both provided, ID is used.'));
-            const tid = await dal.findTargetFromLocator(req.query, req.params.domain);
-            if(tid.code) return responder.send(res, send.success204(tid.data));
+            if(!req.params.domain) return responsder.send(res, send.fail403('Domain is required'));
+            let target = true;
+            if (!req.query.locator && !req.query.targetId) {
+                if (!auth.thisValidAdmin(req.user, config.PRODUCT_SLUG, req.params.domain)) {
+                    return responder.send(res, send.fail400('Unless you are an admin, either a locator or targetId is required. If both provided, ID is used.'));
+                }
+                target = false;
+            }
             const query = {
-                target_id: tid,
-                parent_id: req.query.parentId,
-                domain: req.params.domain,
+                domain: req.params.domain
             };
+            if (target) {
+                const tid = await dal.findTargetFromLocator(req.query, req.params.domain);
+                if(tid.code) return responder.send(res, send.success204(tid.data));
+                query.target_id = tid;
+                if(req.query.parentId) query.parent_id = req.query.parentId;
+            }
             if(req.query.status) query.status = req.query.status;
             return responder.send(res, await dal.getComments(query));
         } catch (error) {
