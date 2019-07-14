@@ -54,5 +54,8 @@
     "mocha": "^3.3.0",
     "sinon": "^7.3.2",
     "sinon-mongoose": "^2.3.0"
+  },
+  "resolutions": {
+    "mocha/*/growl": "^1.10.0"
   }
 }
