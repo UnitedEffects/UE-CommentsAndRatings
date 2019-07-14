@@ -29,7 +29,8 @@ console.info('Connection string: '+mongoConnect);
 const mongoOptions = {
     keepAlive: 300000,
     connectTimeoutMS: 30000,
-    useMongoClient: true
+    useCreateIndex: true,
+    useNewUrlParser: true
 };
 
 if(process.env.NODE_ENV==='production') mongoOptions.replicaSet = config.REPLICA;
