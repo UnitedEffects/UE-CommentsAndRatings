@@ -57,6 +57,7 @@
   },
   "resolutions": {
     "mocha/*/growl": "^1.10.0",
-    "chai-http/*/superagent": "^3.7.0"
+    "chai-http/*/superagent": "^3.7.0",
+    "os-locale/*/mem": "^4.0.0"
   }
 }
